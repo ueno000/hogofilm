@@ -1,0 +1,210 @@
+:root {
+  --bg: #fff6d6;
+  --ink: #2b2140;
+  --ink-soft: #6b5f80;
+  --primary: #ff5c8a;
+  --primary-ink: #ffffff;
+  --accent: #3fc8ff;
+  --yellow: #ffd84d;
+  --danger: #ff6b3d;
+  --card: #ffffff;
+  --line: #2b2140;
+  --phone-body: #2b2140;
+  --phone-screen: #bfe9ff;
+  --radius: 18px;
+  --shadow: 0 4px 0 var(--line);
+  color-scheme: light;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme='light']) {
+    --bg: #1f1a2e;
+    --ink: #fff4e0;
+    --ink-soft: #c9bedc;
+    --card: #2d2542;
+    --line: #0e0b16;
+    --phone-body: #0e0b16;
+    --phone-screen: #3a6e8c;
+    color-scheme: dark;
+  }
+}
+:root[data-theme='dark'] {
+  --bg: #1f1a2e;
+  --ink: #fff4e0;
+  --ink-soft: #c9bedc;
+  --card: #2d2542;
+  --line: #0e0b16;
+  --phone-body: #0e0b16;
+  --phone-screen: #3a6e8c;
+  color-scheme: dark;
+}
+
+* { box-sizing: border-box; }
+
+html, body {
+  margin: 0;
+  height: 100%;
+  background: var(--bg);
+  color: var(--ink);
+  font-family: 'Hiragino Maru Gothic ProN', 'M PLUS Rounded 1c', 'Yu Gothic UI', system-ui, sans-serif;
+  -webkit-tap-highlight-color: transparent;
+  overscroll-behavior: none;
+}
+
+#app {
+  min-height: 100dvh;
+  display: flex;
+  justify-content: center;
+}
+
+.screen {
+  width: 100%;
+  max-width: 480px;
+  min-height: 100dvh;
+  padding: max(16px, env(safe-area-inset-top)) 16px max(16px, env(safe-area-inset-bottom));
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 14px;
+  text-align: center;
+}
+
+h1, h2, p { margin: 0; }
+
+.eyebrow {
+  font-weight: 700;
+  color: var(--primary);
+  letter-spacing: 0.08em;
+}
+
+.logo {
+  font-size: clamp(40px, 12vw, 60px);
+  line-height: 1.05;
+  font-weight: 900;
+  -webkit-text-stroke: 2px var(--line);
+  color: var(--yellow);
+  text-shadow: 0 5px 0 var(--line);
+}
+
+.title-phone { flex: 1 1 auto; min-height: 0; display: flex; align-items: center; justify-content: center; }
+.title-phone .phone { width: auto; height: min(44vw * 2, 340px, 40dvh); }
+
+/* Buttons */
+.actions { display: flex; flex-direction: column; gap: 10px; width: 100%; max-width: 320px; }
+.actions--row { flex-direction: row; max-width: none; }
+.actions--row .btn { flex: 1; }
+
+.btn {
+  appearance: none;
+  border: 3px solid var(--line);
+  border-radius: 999px;
+  background: var(--card);
+  color: var(--ink);
+  font: inherit;
+  font-weight: 800;
+  font-size: 18px;
+  padding: 12px 20px;
+  min-height: 52px;
+  box-shadow: var(--shadow);
+  cursor: pointer;
+  touch-action: manipulation;
+  transition: transform 0.06s, box-shadow 0.06s;
+}
+.btn:active { transform: translateY(3px); box-shadow: 0 1px 0 var(--line); }
+.btn:focus-visible { outline: 3px solid var(--accent); outline-offset: 3px; }
+.btn--primary { background: var(--primary); color: var(--primary-ink); }
+.btn--danger { background: var(--danger); color: #fff; }
+.btn--x { background: #000; color: #fff; }
+
+/* How to */
+.howto-list {
+  text-align: left;
+  display: grid;
+  gap: 10px;
+  padding: 16px 16px 16px 36px;
+  margin: 0;
+  width: 100%;
+  background: var(--card);
+  border: 3px solid var(--line);
+  border-radius: var(--radius);
+}
+.howto-list li { display: grid; gap: 2px; }
+.howto-list span { color: var(--ink-soft); font-size: 14px; }
+.note { font-size: 14px; color: var(--danger); font-weight: 700; }
+
+/* HUD */
+.screen--play { gap: 10px; }
+.hud { width: 100%; display: grid; gap: 6px; }
+.hud__row { display: flex; align-items: center; gap: 8px; font-weight: 800; }
+.hud__step {
+  background: var(--yellow);
+  color: #2b2140;
+  border: 2px solid var(--line);
+  border-radius: 999px;
+  padding: 2px 10px;
+}
+.hud__name { flex: 1; text-align: left; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.hud__time { font-variant-numeric: tabular-nums; min-width: 4.5em; text-align: right; }
+.hud__time.is-danger { color: var(--danger); }
+.hud__bar { height: 10px; border: 2px solid var(--line); border-radius: 999px; overflow: hidden; background: var(--card); }
+.hud__bar-fill { height: 100%; background: var(--accent); transform-origin: left; }
+
+/* Stage */
+.stage-area { width: 100%; flex: 1; display: flex; flex-direction: column; align-items: center; gap: 10px; min-height: 0; }
+.stage-hint { font-weight: 700; }
+.playfield {
+  position: relative;
+  flex: 1;
+  min-height: 0;
+  width: 100%;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  touch-action: none;
+  user-select: none;
+  -webkit-user-select: none;
+}
+.playfield .phone { height: 100%; max-height: 52dvh; width: auto; }
+.playfield__log {
+  position: absolute;
+  bottom: 8px;
+  left: 50%;
+  transform: translateX(-50%);
+  font-size: 12px;
+  color: var(--ink-soft);
+  background: var(--card);
+  padding: 2px 8px;
+  border-radius: 999px;
+  pointer-events: none;
+}
+.stage-controls { width: 100%; display: grid; gap: 10px; }
+.dev-slider { display: flex; align-items: center; gap: 8px; font-size: 13px; color: var(--ink-soft); }
+.dev-slider input { flex: 1; }
+.dev-slider output { min-width: 3em; text-align: right; font-variant-numeric: tabular-nums; }
+
+/* Phone illustration */
+.phone { display: block; width: 100%; height: auto; }
+.phone__body { fill: var(--phone-body); }
+.phone__screen { fill: var(--phone-screen); }
+.phone__notch { fill: var(--phone-body); }
+
+/* Result */
+.screen--result { justify-content: center; }
+.score { display: flex; align-items: baseline; gap: 6px; flex-wrap: wrap; justify-content: center; }
+.score__label { width: 100%; font-weight: 700; color: var(--ink-soft); }
+.score__value { font-size: 88px; font-weight: 900; line-height: 1; color: var(--primary); text-shadow: 0 4px 0 var(--line); font-variant-numeric: tabular-nums; }
+.score__unit { font-size: 24px; font-weight: 800; }
+.remain { color: var(--ink-soft); font-weight: 700; }
+.rank {
+  width: 100%;
+  background: var(--card);
+  border: 3px solid var(--line);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow);
+  padding: 16px;
+  display: grid;
+  gap: 6px;
+}
+.rank__no { font-size: 13px; color: var(--ink-soft); font-weight: 700; }
+.rank__title { font-size: 28px; font-weight: 900; }
+.is-dropped .score__value { color: var(--danger); }
