@@ -1,14 +1,15 @@
 import type { Area } from '../phone';
 import { randRange, type Rng } from './random';
+import { param } from '../../game/params';
 
-export const WIPE_COLS = 10;
-export const WIPE_ROWS = 20;
+export const WIPE_COLS = param('WIPE_COLS');
+export const WIPE_ROWS = param('WIPE_ROWS');
 /** 指（ウェットシート）の半径。SVG 座標単位。 */
-export const WIPE_RADIUS = 16;
+export const WIPE_RADIUS = param('WIPE_RADIUS');
 /** 拭けた割合がここに届くと品質 1 */
-export const WIPE_DONE = 0.95;
+export const WIPE_DONE = param('WIPE_DONE');
 /** 汚れの最大段数。しつこい汚れほど何度もこする必要がある */
-export const WIPE_MAX_DIRT = 3;
+export const WIPE_MAX_DIRT = param('WIPE_MAX_DIRT');
 /** しつこい汚れの塊の数 */
 export const WIPE_BLOB_COUNT = 5;
 /** 塊の半径の範囲（SVG 座標単位） */
@@ -21,13 +22,10 @@ const BLOB_CORE = 0.45;
  * 半径の縁で細かく出入りしても、こする回数が増えないようにする。
  */
 const RELEASE_SCALE = 1.25;
-/**
- * 汚れが落ちたあと、この回数こすると画面が削れて基板が見える（W-3）。
- * シートの調整パラメータは 4 のままだが、難易度改善仕様の 5 を採用（#15 で企画に確認中）。
- */
-export const WIPE_SCRATCH_RUBS = 5;
+/** 汚れが落ちたあと、この回数こすると画面が削れて基板が見える（W-3） */
+export const WIPE_SCRATCH_RUBS = param('WIPE_SCRATCH_RUBS');
 /** 削れた割合に掛ける減点倍率（W-7） */
-export const WIPE_DAMAGE_PENALTY = 1.5;
+export const WIPE_DAMAGE_PENALTY = param('WIPE_DAMAGE_PENALTY');
 
 export interface WipeState {
   area: Area;

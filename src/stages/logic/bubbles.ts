@@ -1,9 +1,10 @@
 import type { Area } from '../phone';
 import { randRange, type Rng } from './random';
+import { param } from '../../game/params';
 
-export const BUBBLE_COUNT = 6;
+export const BUBBLE_COUNT = param('BUBBLE_COUNT');
 /** 指の半径。気泡の縁にこの距離まで近づくと押せる */
-export const FINGER_RADIUS = 10;
+export const FINGER_RADIUS = param('FINGER_RADIUS');
 const EDGE_MARGIN = 24;
 const MIN_GAP = 34;
 

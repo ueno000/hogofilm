@@ -1,13 +1,14 @@
 import { clamp, type Rng } from './random';
+import { param } from '../../game/params';
 
 /** 方向ボタン1回で動く量（SVG 座標単位） */
-export const ALIGN_STEP = 3;
+export const ALIGN_STEP = param('ALIGN_STEP');
 /** 開始時のずれの最大段数 */
-export const ALIGN_MAX_START_STEPS = 6;
+export const ALIGN_MAX_START_STEPS = param('ALIGN_MAX_START_STEPS');
 /** 動かせる範囲（段数） */
-export const ALIGN_LIMIT_STEPS = 10;
+export const ALIGN_LIMIT_STEPS = param('ALIGN_LIMIT_STEPS');
 /** このずれ量で品質 0 */
-export const ALIGN_TOLERANCE = 18;
+export const ALIGN_TOLERANCE = param('ALIGN_TOLERANCE');
 
 export type Direction = 'up' | 'down' | 'left' | 'right';
 
