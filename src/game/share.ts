@@ -27,6 +27,16 @@ export function formatSeconds(ms: number): string {
   return (Math.max(0, ms) / 1000).toFixed(1);
 }
 
+/**
+ * 結果画面の見出し。時間切れを優先し、次にフィルムを落としたまま最後まで進んだ場合。
+ * 落下は事件の行でも別に伝える。
+ */
+export function resultHeading(outcome: Pick<GameOutcome, 'reason' | 'incidents'>): string {
+  if (outcome.reason === 'timeout') return '時間切れ！';
+  if (outcome.incidents.dropped) return 'フィルムなしで完走…';
+  return '貼り付け完了！';
+}
+
 export function buildShareText(outcome: GameOutcome, url?: string): string {
   const rank = getTitle(outcome.tiers, outcome.incidents);
   const incidents = incidentNames(outcome.incidents);

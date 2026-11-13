@@ -14,7 +14,7 @@ import {
   WIPE_EXPOSE_LIMIT,
 } from '../src/game/score';
 import { GameState } from '../src/game/state';
-import { buildShareText, buildXIntentUrl } from '../src/game/share';
+import { buildShareText, buildXIntentUrl, resultHeading } from '../src/game/share';
 import { STAGE_ORDER, type GameOutcome, type StageResult } from '../src/game/types';
 
 const all = (q: number): StageResult[] => STAGE_ORDER.map((stage) => ({ stage, quality: q }));
@@ -197,5 +197,27 @@ describe('share', () => {
   it('事件がついたときは投稿文に書く', () => {
     const text = buildShareText(outcome({ incidents: { dropped: true, overPolished: true } }));
     expect(text).toContain('事件：落下・研磨しすぎ');
+  });
+
+  it('投稿文に総合の品質スコアは出さない', () => {
+    expect(buildShareText(outcome())).not.toContain('品質');
+  });
+});
+
+describe('結果画面の見出し', () => {
+  const heading = (reason: 'completed' | 'timeout', dropped: boolean) =>
+    resultHeading({ reason, incidents: { dropped, overPolished: false } });
+
+  it('最後まで進んだら「貼り付け完了！」', () => {
+    expect(heading('completed', false)).toBe('貼り付け完了！');
+  });
+
+  it('フィルムを落としたまま最後まで進んだら「フィルムなしで完走…」', () => {
+    expect(heading('completed', true)).toBe('フィルムなしで完走…');
+  });
+
+  it('時間切れは落下より優先する', () => {
+    expect(heading('timeout', false)).toBe('時間切れ！');
+    expect(heading('timeout', true)).toBe('時間切れ！');
   });
 });
