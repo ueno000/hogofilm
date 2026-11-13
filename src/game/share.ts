@@ -1,4 +1,4 @@
-import { interimRank } from './ranks';
+import { getTitle } from './ranks';
 import type { GameOutcome, Incidents, ScoreAxis, Tier } from './types';
 
 export const AXIS_ORDER: readonly ScoreAxis[] = ['speed', 'screen', 'film'];
@@ -28,7 +28,7 @@ export function formatSeconds(ms: number): string {
 }
 
 export function buildShareText(outcome: GameOutcome, url?: string): string {
-  const rank = interimRank(outcome.scores);
+  const rank = getTitle(outcome.tiers, outcome.incidents);
   const incidents = incidentNames(outcome.incidents);
   const lines = [
     '保護フィルム貼りの結果！',
