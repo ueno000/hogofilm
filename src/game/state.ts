@@ -1,9 +1,10 @@
 import { STAGE_ORDER, type EndReason, type GameOutcome, type StageDetail, type StageId, type StageResult } from './types';
 import { evaluate } from './score';
+import { param } from './params';
 
-export const TIME_LIMIT_MS = 90_000;
+export const TIME_LIMIT_MS = param('TIME_LIMIT_MS');
 /** フィルムを落としたあと、残りの工程を自動で進める間隔（1工程あたり、ms） */
-export const DROP_AUTO_STAGE_MS = 1000;
+export const DROP_AUTO_STAGE_MS = param('DROP_AUTO_STAGE_MS');
 
 /** 1プレイ分の進行状態。描画は持たず、シーン側から操作する。 */
 export class GameState {

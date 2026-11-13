@@ -1,9 +1,10 @@
 import type { Area } from '../phone';
 import { randRange, type Rng } from './random';
+import { param } from '../../game/params';
 
-export const DUST_COUNT = 7;
+export const DUST_COUNT = param('DUST_COUNT');
 /** 埃の当たり判定に足す余裕（小さい埃もタップしやすく）。SVG 座標単位。 */
-export const DUST_HIT_MARGIN = 14;
+export const DUST_HIT_MARGIN = param('DUST_HIT_MARGIN');
 const EDGE_MARGIN = 14;
 const MIN_GAP = 26;
 
