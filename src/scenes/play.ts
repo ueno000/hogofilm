@@ -66,9 +66,9 @@ export const playScene: Scene = (root, nav) => {
     }
 
     unmountStage = stage.mount(stageArea, {
-      complete: (quality) => {
+      complete: (quality, detail) => {
         if (ended) return;
-        state.completeStage(quality);
+        state.completeStage(quality, detail);
         mountCurrent();
       },
       drop: () => {

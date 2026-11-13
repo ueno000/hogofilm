@@ -1,25 +1,82 @@
-import { FILM_STAGES, type StageId, type StageResult } from './types';
+import type { EndReason, Incidents, ScoreAxis, Scores, StageId, StageResult, Tier } from './types';
 
-/** 品質スコアへの各工程の配点（合計100）。暫定値。評価の3軸化は #21 で置き換える */
-export const STAGE_WEIGHTS: Record<StageId, number> = {
-  wipe: 20,
-  dust: 20,
-  align: 20,
-  tack: 15,
-  bubbles: 25,
-};
+/** 残り時間がこれ以上なら手早さ 100点（ms） */
+export const SPEED_FULL_REMAIN_MS = 30_000;
+/** 画面の綺麗さの配点（合計100） */
+export const SCREEN_WEIGHTS: Partial<Record<StageId, number>> = { wipe: 50, dust: 50 };
+/** フィルムの貼り方の配点（合計100） */
+export const FILM_WEIGHTS: Partial<Record<StageId, number>> = { align: 35, tack: 25, bubbles: 40 };
+/** 段階「高」の下限（点） */
+export const RANK_HIGH_MIN = 80;
+/** 段階「中」の下限（点） */
+export const RANK_MID_MIN = 40;
+/** 削れた割合がこれを超えると事件「研磨しすぎ」 */
+export const WIPE_EXPOSE_LIMIT = 0.1;
 
-/**
- * 工程結果から品質スコア（0〜100の整数）を求める。
- * - 未完了の工程は 0 点扱い（時間切れ時）
- * - フィルムを落とした場合は、フィルムを扱う工程（位置合わせ・仮固定・気泡抜き）を 0 点にする
- */
-export function calcScore(results: readonly StageResult[], dropped = false): number {
+function clamp01(v: number): number {
+  return Number.isFinite(v) ? Math.min(1, Math.max(0, v)) : 0;
+}
+
+function toPoints(v: number): number {
+  return Math.min(100, Math.max(0, Math.round(v)));
+}
+
+/** 配点つきの合計。結果のない工程（時間切れで未完了）は 0 点 */
+function weighted(results: readonly StageResult[], weights: Partial<Record<StageId, number>>): number {
   let total = 0;
-  for (const r of results) {
-    if (dropped && FILM_STAGES.includes(r.stage)) continue;
-    const q = Number.isFinite(r.quality) ? Math.min(1, Math.max(0, r.quality)) : 0;
-    total += STAGE_WEIGHTS[r.stage] * q;
-  }
-  return Math.min(100, Math.max(0, Math.round(total)));
+  for (const r of results) total += (weights[r.stage] ?? 0) * clamp01(r.quality);
+  return toPoints(total);
+}
+
+/** 手早さ: 100 × min(1, 残り時間 ÷ 満点になる残り時間)。時間切れ・落下のときは 0 */
+export function speedScore(remainingMs: number, reason: EndReason, dropped: boolean): number {
+  if (reason === 'timeout' || dropped) return 0;
+  return toPoints(100 * clamp01(remainingMs / SPEED_FULL_REMAIN_MS));
+}
+
+/** 画面の綺麗さ: 拭く × 50 ＋ 埃取り × 50（削れの減点は拭く品質に含まれる） */
+export function screenScore(results: readonly StageResult[]): number {
+  return weighted(results, SCREEN_WEIGHTS);
+}
+
+/** フィルムの貼り方: 位置合わせ × 35 ＋ 仮固定 × 25 ＋ 気泡抜き × 40。落下があれば 0 */
+export function filmScore(results: readonly StageResult[], dropped: boolean): number {
+  return dropped ? 0 : weighted(results, FILM_WEIGHTS);
+}
+
+export function scoreTier(score: number): Tier {
+  if (score >= RANK_HIGH_MIN) return 'high';
+  if (score >= RANK_MID_MIN) return 'mid';
+  return 'low';
+}
+
+/** 拭く工程で削れた割合が規定を超えたら「研磨しすぎ」 */
+export function isOverPolished(results: readonly StageResult[]): boolean {
+  const wipe = results.find((r) => r.stage === 'wipe');
+  return (wipe?.scratchedRatio ?? 0) > WIPE_EXPOSE_LIMIT;
+}
+
+export interface Evaluation {
+  scores: Scores;
+  tiers: Record<ScoreAxis, Tier>;
+  incidents: Incidents;
+}
+
+/** 工程結果から、点数の軸3つ・段階・事件の軸2つを求める。 */
+export function evaluate(
+  results: readonly StageResult[],
+  reason: EndReason,
+  remainingMs: number,
+  dropped: boolean,
+): Evaluation {
+  const scores: Scores = {
+    speed: speedScore(remainingMs, reason, dropped),
+    screen: screenScore(results),
+    film: filmScore(results, dropped),
+  };
+  return {
+    scores,
+    tiers: { speed: scoreTier(scores.speed), screen: scoreTier(scores.screen), film: scoreTier(scores.film) },
+    incidents: { dropped, overPolished: isOverPolished(results) },
+  };
 }
