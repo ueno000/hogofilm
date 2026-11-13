@@ -175,8 +175,7 @@ h1, h2, p { margin: 0; }
 .stage-controls > .btn { width: 100%; max-width: 320px; }
 
 /* 拭く */
-.smudge__base { fill: var(--smudge); opacity: 0.55; }
-.smudge__spot { fill: var(--smudge); opacity: 0.45; }
+.smudge__cell { fill: var(--smudge); transition: opacity 0.15s; }
 
 /* 埃 */
 .dust__speck { fill: #3a2f2a; stroke: #fff; stroke-width: 1; }
