@@ -1,17 +1,18 @@
 import type { EndReason, Incidents, ScoreAxis, Scores, StageId, StageResult, Tier } from './types';
+import { param } from './params';
 
 /** 残り時間がこれ以上なら手早さ 100点（ms） */
-export const SPEED_FULL_REMAIN_MS = 30_000;
+export const SPEED_FULL_REMAIN_MS = param('SPEED_FULL_REMAIN_MS');
 /** 画面の綺麗さの配点（合計100） */
 export const SCREEN_WEIGHTS: Partial<Record<StageId, number>> = { wipe: 50, dust: 50 };
 /** フィルムの貼り方の配点（合計100） */
 export const FILM_WEIGHTS: Partial<Record<StageId, number>> = { align: 35, tack: 25, bubbles: 40 };
 /** 段階「高」の下限（点） */
-export const RANK_HIGH_MIN = 80;
+export const RANK_HIGH_MIN = param('RANK_HIGH_MIN');
 /** 段階「中」の下限（点） */
-export const RANK_MID_MIN = 40;
+export const RANK_MID_MIN = param('RANK_MID_MIN');
 /** 削れた割合がこれを超えると事件「研磨しすぎ」 */
-export const WIPE_EXPOSE_LIMIT = 0.1;
+export const WIPE_EXPOSE_LIMIT = param('WIPE_EXPOSE_LIMIT');
 
 function clamp01(v: number): number {
   return Number.isFinite(v) ? Math.min(1, Math.max(0, v)) : 0;
