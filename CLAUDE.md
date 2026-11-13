@@ -29,7 +29,8 @@ npm run build   # tsc --noEmit による型チェック + vite build
 
 - `src/main.ts` — エントリポイント。`src/dom.ts` は DOM ヘルパー
 - `src/scenes/` — タイトル、遊び方、プレイ、結果の各画面
-- `src/game/` — 状態、タイマー、スコア、称号、シェア文（DOM 非依存）
+- `src/game/` — 状態、タイマー、スコア、称号、シェア文、調整値の読み込み（DOM 非依存）
+- `src/params.csv` — 調整値。企画管理シートの「パラメータCSV」タブから出力したものを置く
 - `src/stages/` — 各工程の UI。`Stage` インターフェース（`stage.ts`）を実装し、`index.ts` に登録する
 - `src/stages/logic/` — 各工程の判定ロジック（DOM 非依存の純粋関数）
 - `tests/` — `src` と対応する配置で Vitest のテストを置く
@@ -40,7 +41,11 @@ npm run build   # tsc --noEmit による型チェック + vite build
 - シングルクォート、セミコロンあり、インデント 2 スペース。既存コードの書き方に合わせる。
 - 型だけの import は `import type` を使う。
 - 判定・計算ロジックは `src/stages/logic/` や `src/game/` に DOM 非依存の純粋関数として置く。UI 側（`src/stages/*.ts`, `src/scenes/*.ts`）は描画と入力処理に専念する。
-- 調整用の数値はマジックナンバーにせず、名前付き定数（例: `WIPE_RADIUS`）にして単位や意味をコメントで書く。
+- 調整用の数値（企画が変えて試す値）は `src/params.csv` に置き、`src/game/params.ts` の `param()` で引く。定数として受けて使う（例: `export const WIPE_RADIUS = param('WIPE_RADIUS');`）。
+  - CSV の列は `name,value,unit,stage,description`。企画管理シートの「パラメータCSV」タブから出力した形と同じにする。
+  - 調整値を追加するときは、`src/params.csv` に行を足し、`params.ts` の `PARAM_NAMES` にも名前を足す。CSV に無い名前や数値でない値があると、ゲームは起動せずに画面へエラーを出す。
+  - シートの「パラメータCSV」タブにまだ無い名前を足したときは、Issue コメントで企画にシートへの追加を頼む（シートは編集しない）。
+  - 描画用の固定値（`SCREEN` など）や配点・称号表は CSV に入れず、名前付き定数にして単位や意味をコメントで書く。
 - コメント・JSDoc は日本語で簡潔に。UI 文言も日本語。
 - 工程を追加するときは `Stage` インターフェースに従い、`game/types.ts` の `StageId` / `STAGE_ORDER` と `stages/index.ts` に登録する。
 - `mount` が返す後片付け関数で、イベントリスナー・タイマー・アニメーションを必ず解除する。
@@ -77,7 +82,7 @@ npm run build   # tsc --noEmit による型チェック + vite build
   - **理由**: なぜ変えたか（ユーザーの指示・プレイ確認の結果など）
   - **影響範囲**: 関係するファイル・工程・他の Issue
 - ルール・文言の変更は、仕様の正本である `docs/game-plan.md` も同じ変更で更新する。
-- 調整パラメータなど数値を変えた場合は、シートを直接書き換えず、Issue コメントに変更前 → 変更後を書く。シートへの反映はユーザー（企画）とマネージャーが行う。
+- 調整パラメータなど数値を変えた場合は、シートを直接書き換えず、Issue コメントに変更前 → 変更後を書く。シートへの反映はユーザー（企画）とマネージャーが行う。`src/params.csv` の値とシートがずれる場合は、その旨もコメントに書く。
 - シート側で仕様が変わったときは、マネージャーが Issue にコメントまたは起票する（手順は [docs/management.md](docs/management.md)）。
 - 複数の Issue にまたがる変更は、それぞれの Issue にコメントし相互にリンクする（`#番号`）。
 

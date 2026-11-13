@@ -13,11 +13,12 @@ import {
   tackQuality,
   type Judgment,
 } from './logic/tack';
+import { param } from '../game/params';
 
 /** 隅のタップ受付範囲（SVG 座標単位） */
-const TAP_RANGE = 48;
-const FIRST_DELAY = 700;
-const BETWEEN_DELAY = 450;
+const TAP_RANGE = param('TAP_RANGE');
+const FIRST_DELAY = param('FIRST_DELAY');
+const BETWEEN_DELAY = param('BETWEEN_DELAY');
 
 export const tackStage: Stage = {
   id: 'tack',

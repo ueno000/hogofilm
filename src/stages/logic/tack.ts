@@ -1,15 +1,17 @@
+import { param } from '../../game/params';
+
 /** リングの開始半径 */
-export const RING_START = 44;
+export const RING_START = param('RING_START');
 /** リングが 0 まで縮む時間（ms） */
-export const RING_DURATION = 1000;
+export const RING_DURATION = param('RING_DURATION');
 /** 隅の目標マーカーの半径。リングがここに重なった瞬間が最高 */
-export const RING_TARGET = 12;
+export const RING_TARGET = param('RING_TARGET');
 /** 判定幅（リング半径と目標半径の差） */
-export const JUDGE_PERFECT = 3;
-export const JUDGE_GOOD = 7;
-export const JUDGE_BAD = 12;
+export const JUDGE_PERFECT = param('JUDGE_PERFECT');
+export const JUDGE_GOOD = param('JUDGE_GOOD');
+export const JUDGE_BAD = param('JUDGE_BAD');
 /** この回数ミスするとフィルムを落とす */
-export const MAX_MISSES = 2;
+export const MAX_MISSES = param('MAX_MISSES');
 
 export type Judgment = 'perfect' | 'good' | 'bad' | 'miss';
 
