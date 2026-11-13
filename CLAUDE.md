@@ -83,8 +83,18 @@ npm run build   # tsc --noEmit による型チェック + vite build
 
 ### 作業ブランチ・PR との紐付け
 
+PR の Development 欄には、対応する Issue を**必ず**設定する。
+
+- PR の向き先 `develop` はデフォルトブランチではないため、本文の `Closes #番号` だけでは Development 欄に紐付かない。
+- そのため作業ブランチは `gh issue develop` で Issue に紐付けて作る。このブランチから出した PR は自動で Development 欄に Issue が入る。
+
+```bash
+gh issue develop <番号> --base develop --name feat/<番号>-xxx --checkout
+```
+
 - ブランチ名に Issue 番号を入れる（例: `feat/1-wipe-stage`, `fix/4-tack-timing`）。
-- PR 本文に `Closes #番号`（完了する場合）または `Refs #番号`（一部対応の場合）を書く。
+- PR 本文にも `Closes #番号`（完了する場合）または `Refs #番号`（一部対応の場合）を書く。
+- PR 作成後、`gh issue develop <番号> --list` か PR 画面で Development 欄に Issue が入っていることを確認する。入っていなければ PR 画面の Development から手動で設定する。
 
 ## ブランチ運用
 
@@ -98,7 +108,7 @@ npm run build   # tsc --noEmit による型チェック + vite build
 ```bash
 git switch develop
 git pull
-git switch -c feat/<番号>-xxx
+gh issue develop <番号> --base develop --name feat/<番号>-xxx --checkout
 ```
 
 - リリース時は `develop` → `main` の PR を作る。マージ後、`main` の内容が最終版になる。
@@ -118,4 +128,5 @@ git switch -c feat/<番号>-xxx
   - **概要**: 何のための変更か。関連 Issue を `Closes #番号` / `Refs #番号` で書く
   - **変更点**: 主な変更の箇条書き
   - **動作確認**: 実行したテスト・ビルド、ブラウザでの確認内容（UI 変更はスクリーンショットを添える）
+- Development 欄に対応 Issue が設定されていること（上記「作業ブランチ・PR との紐付け」）。
 - テストとビルドが通っていること。マージはユーザーが判断する。
