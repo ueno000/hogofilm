@@ -11,6 +11,7 @@ import {
   isScratched,
   rubAt,
   rubLine,
+  scratchedRatio,
   WIPE_DONE,
   WIPE_MAX_DIRT,
   wipeQuality,
@@ -120,7 +121,7 @@ export const wipeStage: Stage = {
     view.controls.append(nextButton('次へ', () => {
       if (done) return;
       done = true;
-      ctx.complete(wipeQuality(state));
+      ctx.complete(wipeQuality(state), { scratchedRatio: scratchedRatio(state) });
     }, true));
     render();
 

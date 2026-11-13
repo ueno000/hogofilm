@@ -1,3 +1,5 @@
+import type { Scores } from './types';
+
 export interface Rank {
   no: number;
   min: number;
@@ -39,6 +41,14 @@ export const RANKS: readonly Rank[] = TABLE.map(([title, comment], i) => ({
 }));
 
 /** スコアに対応する称号。範囲外・非整数は 0〜100 の整数に丸めてから判定する。 */
+/**
+ * 暫定: 点数の軸3つの平均から旧20段階の称号を引く。
+ * #23（評価軸の組み合わせで決まる34種類の称号）で置き換える。
+ */
+export function interimRank(scores: Scores): Rank {
+  return getRank((scores.speed + scores.screen + scores.film) / 3);
+}
+
 export function getRank(score: number): Rank {
   const s = Number.isFinite(score) ? Math.min(100, Math.max(0, Math.floor(score))) : 0;
   return RANKS[Math.min(RANKS.length - 1, Math.floor(s / 5))];

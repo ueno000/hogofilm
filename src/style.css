@@ -241,10 +241,35 @@ h1, h2, p { margin: 0; }
 
 /* Result */
 .screen--result { justify-content: center; }
-.score { display: flex; align-items: baseline; gap: 6px; flex-wrap: wrap; justify-content: center; }
-.score__label { width: 100%; font-weight: 700; color: var(--ink-soft); }
-.score__value { font-size: 88px; font-weight: 900; line-height: 1; color: var(--primary); text-shadow: 0 4px 0 var(--line); font-variant-numeric: tabular-nums; }
-.score__unit { font-size: 24px; font-weight: 800; }
+.axes { width: 100%; margin: 0; display: grid; gap: 8px; }
+.axis {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  padding: 8px 14px;
+  background: var(--card);
+  border: 3px solid var(--line);
+  border-radius: 14px;
+}
+.axis__label { font-weight: 800; }
+.axis__value { margin: 0; display: flex; align-items: baseline; gap: 4px; }
+.axis__score { font-size: 32px; font-weight: 900; line-height: 1; color: var(--primary); font-variant-numeric: tabular-nums; }
+.axis__unit { font-weight: 800; }
+.axis__tier {
+  margin-left: 6px;
+  min-width: 2em;
+  padding: 2px 8px;
+  border: 2px solid var(--line);
+  border-radius: 999px;
+  font-weight: 900;
+  text-align: center;
+  background: var(--card);
+  color: var(--ink);
+}
+.axis.is-high .axis__tier { background: var(--accent); color: #2b2140; }
+.axis.is-mid .axis__tier { background: var(--yellow); color: #2b2140; }
+.incidents { font-weight: 900; color: var(--danger); }
 .remain { color: var(--ink-soft); font-weight: 700; }
 .rank {
   width: 100%;
@@ -256,6 +281,4 @@ h1, h2, p { margin: 0; }
   display: grid;
   gap: 6px;
 }
-.rank__no { font-size: 13px; color: var(--ink-soft); font-weight: 700; }
 .rank__title { font-size: 28px; font-weight: 900; }
-.is-dropped .score__value { color: var(--danger); }
