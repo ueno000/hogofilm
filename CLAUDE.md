@@ -85,21 +85,20 @@ npm run build   # tsc --noEmit による型チェック + vite build
 
 PR の Development 欄には、対応する Issue を**必ず**設定する。
 
-- PR の向き先 `develop` はデフォルトブランチではないため、本文の `Closes #番号` だけでは Development 欄に紐付かない。
-- そのため作業ブランチは `gh issue develop` で Issue に紐付けて作る。このブランチから出した PR は自動で Development 欄に Issue が入る。
+- リポジトリのデフォルトブランチは `develop`。`develop` 向け PR の本文に `Closes #番号` を書くと、Development 欄に Issue が入り、マージ時に Issue が自動でクローズされる。
+- Issue を完了させる PR は、本文に必ず `Closes #番号` を書く。
+- 一部対応の PR は `Refs #番号` を書く。ただし `Refs` では Development 欄に入らないので、PR 作成後に PR 画面の Development から Issue を手動で設定する。
+- ブランチ名に Issue 番号を入れる（例: `feat/1-wipe-stage`, `fix/4-tack-timing`）。
+- PR 作成後、Development 欄に Issue が入っていることを確認する。
 
 ```bash
-gh issue develop <番号> --base develop --name feat/<番号>-xxx --checkout
+gh pr view <PR番号> --json closingIssuesReferences --jq '[.closingIssuesReferences[].number]'
 ```
-
-- ブランチ名に Issue 番号を入れる（例: `feat/1-wipe-stage`, `fix/4-tack-timing`）。
-- PR 本文にも `Closes #番号`（完了する場合）または `Refs #番号`（一部対応の場合）を書く。
-- PR 作成後、`gh issue develop <番号> --list` か PR 画面で Development 欄に Issue が入っていることを確認する。入っていなければ PR 画面の Development から手動で設定する。
 
 ## ブランチ運用
 
 - `main` — 最終（リリース）ブランチ。直接コミットしない。`develop` からの PR でのみ更新する。
-- `develop` — 開発の統合ブランチ。直接コミットしない。作業ブランチからの PR で更新する。
+- `develop` — 開発の統合ブランチで、リポジトリのデフォルトブランチ。直接コミットしない。作業ブランチからの PR で更新する。
 - 作業ブランチ — 最新の `develop` から切り、`develop` 向けに PR を出す。
   - 名前は `種別/内容` の英小文字・ハイフン区切り
   - `feat/` 機能追加、`fix/` バグ修正、`refactor/` リファクタリング、`docs/` ドキュメント、`chore/` 設定・依存など
@@ -108,7 +107,7 @@ gh issue develop <番号> --base develop --name feat/<番号>-xxx --checkout
 ```bash
 git switch develop
 git pull
-gh issue develop <番号> --base develop --name feat/<番号>-xxx --checkout
+git switch -c feat/<番号>-xxx
 ```
 
 - リリース時は `develop` → `main` の PR を作る。マージ後、`main` の内容が最終版になる。
@@ -125,7 +124,7 @@ gh issue develop <番号> --base develop --name feat/<番号>-xxx --checkout
 
 - 作業ブランチの PR は `develop` 向け（`gh pr create --base develop`）。`main` 向けは `develop` からのリリース PR だけ。
 - タイトルは英語の短い要約。本文は以下の構成で書く。
-  - **概要**: 何のための変更か。関連 Issue を `Closes #番号` / `Refs #番号` で書く
+  - **概要**: 何のための変更か。関連 Issue を `Closes #番号`（完了）/ `Refs #番号`（一部対応）で書く
   - **変更点**: 主な変更の箇条書き
   - **動作確認**: 実行したテスト・ビルド、ブラウザでの確認内容（UI 変更はスクリーンショットを添える）
 - Development 欄に対応 Issue が設定されていること（上記「作業ブランチ・PR との紐付け」）。
