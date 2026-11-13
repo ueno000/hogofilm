@@ -10,7 +10,7 @@ export const howToScene: Scene = (root, nav) => {
       h('ol', { class: 'howto-list' },
         ...STAGES.map((s) => h('li', {}, h('strong', {}, s.name), h('span', {}, s.hint))),
       ),
-      h('p', { class: 'note' }, '仮固定で大きく失敗すると、フィルムを床に落としてゲーム終了！'),
+      h('p', { class: 'note' }, '仮固定で大きく失敗すると、フィルムを床に落としてしまう！ 残りはフィルムなしで進むよ。'),
       h('div', { class: 'actions' },
         h('button', { class: 'btn btn--primary', onclick: () => nav.toPlay() }, 'スタート'),
         h('button', { class: 'btn', onclick: () => nav.toTitle() }, 'もどる'),

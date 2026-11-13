@@ -7,8 +7,9 @@ import type { Scene } from './scene';
 const REASON_LABEL: Record<GameOutcome['reason'], string> = {
   completed: '貼り付け完了！',
   timeout: '時間切れ！',
-  dropped: 'フィルムを床に落とした…',
 };
+/** フィルムを落としたときの見出し（結果画面の作り直しは #24） */
+const DROPPED_LABEL = 'フィルムを床に落とした…';
 
 export const resultScene = (outcome: GameOutcome): Scene => (root, nav) => {
   const rank = getRank(outcome.score);
@@ -18,8 +19,8 @@ export const resultScene = (outcome: GameOutcome): Scene => (root, nav) => {
   };
 
   root.append(
-    h('main', { class: `screen screen--result is-${outcome.reason}` },
-      h('p', { class: 'eyebrow' }, REASON_LABEL[outcome.reason]),
+    h('main', { class: `screen screen--result is-${outcome.reason}${outcome.dropped ? ' is-dropped' : ''}` },
+      h('p', { class: 'eyebrow' }, outcome.dropped ? DROPPED_LABEL : REASON_LABEL[outcome.reason]),
       h('div', { class: 'score' },
         h('span', { class: 'score__label' }, '品質スコア'),
         h('span', { class: 'score__value' }, String(outcome.score)),

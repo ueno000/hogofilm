@@ -4,6 +4,7 @@ import { CountdownTimer } from '../game/timer';
 import { formatSeconds } from '../game/share';
 import { STAGE_ORDER, type EndReason } from '../game/types';
 import { getStage } from '../stages';
+import { mountSkippedStage } from '../stages/skipped';
 import type { Scene } from './scene';
 
 export const playScene: Scene = (root, nav) => {
@@ -53,13 +54,28 @@ export const playScene: Scene = (root, nav) => {
     const stage = getStage(id);
     stepLabel.textContent = `${state.stageNumber}/${STAGE_ORDER.length}`;
     stageName.textContent = stage.name;
+
+    // フィルムを落としたあとの工程は、操作なしで自動で進める
+    if (state.dropped) {
+      unmountStage = mountSkippedStage(stageArea, id, () => {
+        if (ended) return;
+        state.completeStage(0);
+        mountCurrent();
+      });
+      return;
+    }
+
     unmountStage = stage.mount(stageArea, {
       complete: (quality) => {
         if (ended) return;
         state.completeStage(quality);
         mountCurrent();
       },
-      drop: () => end('dropped'),
+      drop: () => {
+        if (ended) return;
+        state.dropFilm();
+        mountCurrent();
+      },
     });
   }
 
