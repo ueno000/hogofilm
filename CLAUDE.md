@@ -47,6 +47,33 @@ npm run build   # tsc --noEmit による型チェック + vite build
 - ロジックを追加・変更したら `tests/` に Vitest のテストを追加・更新する。テスト名（`it`）は日本語で振る舞いを書く。
 - UI の変更は dev サーバーをブラウザで開いて確認する。スマホ幅（375px 程度）とタッチ操作も確認する。
 
+## チケット（GitHub Issue）運用
+
+作業は GitHub Issue（`ueno000/hogofilm`）を単位に進める。
+
+### 作業開始時（毎回）
+
+1. `gh issue list` で未完了のチケットを確認し、今回の作業に対応する Issue を特定する。
+2. `gh issue view <番号> --comments` で本文とコメント履歴を読み、最新の仕様・決定事項を把握してから着手する。
+3. 対応する Issue がない作業は、着手前に Issue を作る（ラベル: `stage` / `ui` / `game-logic` / `test` / `release` / `bug` / `documentation` など）。
+4. Issue の内容と `docs/game-plan.md` が食い違う場合は、作業前にユーザーに確認する。
+
+### 仕様が変わったとき
+
+仕様変更は必ず Issue コメントに残し、履歴を追えるようにする。Issue 本文は書き換えず、コメントで追記する。
+
+- 該当 Issue に `gh issue comment <番号>` で以下を書く。
+  - **変更内容**: 何がどう変わったか（変更前 → 変更後）
+  - **理由**: なぜ変えたか（ユーザーの指示・プレイ確認の結果など）
+  - **影響範囲**: 関係するファイル・工程・他の Issue
+- 仕様の正本である `docs/game-plan.md` も同じ変更で更新する。
+- 複数の Issue にまたがる変更は、それぞれの Issue にコメントし相互にリンクする（`#番号`）。
+
+### 作業ブランチ・PR との紐付け
+
+- ブランチ名に Issue 番号を入れる（例: `feat/1-wipe-stage`, `fix/4-tack-timing`）。
+- PR 本文に `Closes #番号`（完了する場合）または `Refs #番号`（一部対応の場合）を書く。
+
 ## ブランチ運用
 
 - `main` — 最終（リリース）ブランチ。直接コミットしない。`develop` からの PR でのみ更新する。
@@ -54,12 +81,12 @@ npm run build   # tsc --noEmit による型チェック + vite build
 - 作業ブランチ — 最新の `develop` から切り、`develop` 向けに PR を出す。
   - 名前は `種別/内容` の英小文字・ハイフン区切り
   - `feat/` 機能追加、`fix/` バグ修正、`refactor/` リファクタリング、`docs/` ドキュメント、`chore/` 設定・依存など
-  - 例: `feat/sound-effects`, `fix/tack-timing`
+  - Issue がある場合は番号を入れる。例: `feat/5-bubbles-stage`, `fix/4-tack-timing`
 
 ```bash
 git switch develop
 git pull
-git switch -c feat/xxx
+git switch -c feat/<番号>-xxx
 ```
 
 - リリース時は `develop` → `main` の PR を作る。マージ後、`main` の内容が最終版になる。
@@ -76,7 +103,7 @@ git switch -c feat/xxx
 
 - 作業ブランチの PR は `develop` 向け（`gh pr create --base develop`）。`main` 向けは `develop` からのリリース PR だけ。
 - タイトルは英語の短い要約。本文は以下の構成で書く。
-  - **概要**: 何のための変更か
+  - **概要**: 何のための変更か。関連 Issue を `Closes #番号` / `Refs #番号` で書く
   - **変更点**: 主な変更の箇条書き
   - **動作確認**: 実行したテスト・ビルド、ブラウザでの確認内容（UI 変更はスクリーンショットを添える）
 - テストとビルドが通っていること。マージはユーザーが判断する。
