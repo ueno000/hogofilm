@@ -4,10 +4,14 @@ import {
   cleanRatio,
   createWipe,
   endStroke,
+  isScratched,
   rubAt,
   rubLine,
+  scratchedRatio,
+  WIPE_DAMAGE_PENALTY,
   WIPE_DONE,
   WIPE_MAX_DIRT,
+  WIPE_SCRATCH_RUBS,
   wipeQuality,
   type WipeState,
 } from '../../src/stages/logic/wipe';
@@ -117,5 +121,57 @@ describe('wipe: 品質', () => {
     const s = uniform(0);
     for (let i = 0; i < Math.floor(200 * (1 - WIPE_DONE)); i++) s.dirt[i] = 2;
     expect(wipeQuality(s)).toBe(1);
+  });
+
+  it('削れた割合 × 減点倍率を引く', () => {
+    const s = uniform(0);
+    s.scrub.fill(WIPE_SCRATCH_RUBS, 0, 20); // 10% 削れ
+    expect(scratchedRatio(s)).toBe(0.1);
+    expect(wipeQuality(s)).toBeCloseTo(1 - 0.1 * WIPE_DAMAGE_PENALTY);
+  });
+
+  it('削れが多くても品質は0未満にならない', () => {
+    const s = uniform(0);
+    s.scrub.fill(WIPE_SCRATCH_RUBS);
+    expect(wipeQuality(s)).toBe(0);
+  });
+});
+
+describe('wipe: 削れ（研磨）', () => {
+  it('汚れを落とした1回は削れに数えない', () => {
+    const s = uniform(1);
+    stroke(s, 5, 5, 95, 5);
+    expect(s.dirt[0]).toBe(0);
+    expect(s.scrub[0]).toBe(0);
+  });
+
+  it(`汚れが落ちたあと${WIPE_SCRATCH_RUBS}回こすると削れて基板が見える`, () => {
+    const s = uniform(0);
+    for (let n = 1; n < WIPE_SCRATCH_RUBS; n++) {
+      stroke(s, 5, 5, 95, 5);
+      expect(isScratched(s, 0)).toBe(false);
+    }
+    stroke(s, 5, 5, 95, 5);
+    expect(isScratched(s, 0)).toBe(true);
+    expect(scratchedRatio(s)).toBe(10 / 200);
+  });
+
+  it('削れたら、それ以上こすっても回数は増えない', () => {
+    const s = uniform(0);
+    for (let n = 0; n < WIPE_SCRATCH_RUBS + 3; n++) stroke(s, 5, 5, 95, 5);
+    expect(s.scrub[0]).toBe(WIPE_SCRATCH_RUBS);
+  });
+
+  it('新しく削れたマスは「見た目が変わった」として数える', () => {
+    const s = uniform(0);
+    s.scrub.fill(WIPE_SCRATCH_RUBS - 1);
+    beginStroke(s);
+    expect(rubAt(s, 5, 5, 4)).toBe(1);
+  });
+
+  it('こすっていない場所は削れない', () => {
+    const s = uniform(0);
+    for (let n = 0; n < WIPE_SCRATCH_RUBS; n++) stroke(s, 5, 5, 95, 5);
+    expect(s.scrub.slice(10).every((n) => n === 0)).toBe(true);
   });
 });

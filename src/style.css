@@ -176,6 +176,11 @@ h1, h2, p { margin: 0; }
 
 /* 拭く */
 .smudge__cell { fill: var(--smudge); transition: opacity 0.15s; }
+.board__cell { opacity: 0; transition: opacity 0.2s; }
+.board__cell.is-exposed { opacity: 1; }
+.board__base { fill: #1f7a3d; }
+.board__trace { fill: none; stroke: #d8b44a; stroke-width: 1.4; }
+.board__pad { fill: #d8b44a; }
 
 /* 埃 */
 .dust__speck { fill: #3a2f2a; stroke: #fff; stroke-width: 1; }
