@@ -11,6 +11,8 @@
   --line: #2b2140;
   --phone-body: #2b2140;
   --phone-screen: #bfe9ff;
+  --screen-clear: #d9f4ff;
+  --smudge: #a8865c;
   --radius: 18px;
   --shadow: 0 4px 0 var(--line);
   color-scheme: light;
@@ -25,6 +27,7 @@
     --line: #0e0b16;
     --phone-body: #0e0b16;
     --phone-screen: #3a6e8c;
+    --screen-clear: #4f8fb0;
     color-scheme: dark;
   }
 }
@@ -36,6 +39,7 @@
   --line: #0e0b16;
   --phone-body: #0e0b16;
   --phone-screen: #3a6e8c;
+  --screen-clear: #4f8fb0;
   color-scheme: dark;
 }
 
@@ -165,22 +169,65 @@ h1, h2, p { margin: 0; }
   -webkit-user-select: none;
 }
 .playfield .phone { height: 100%; max-height: 52dvh; width: auto; }
-.playfield__log {
-  position: absolute;
-  bottom: 8px;
-  left: 50%;
-  transform: translateX(-50%);
-  font-size: 12px;
-  color: var(--ink-soft);
-  background: var(--card);
-  padding: 2px 8px;
-  border-radius: 999px;
-  pointer-events: none;
+.playfield.is-cleared .phone__screen { fill: var(--screen-clear); }
+.stage-status { font-weight: 800; font-variant-numeric: tabular-nums; min-height: 1.4em; }
+.stage-controls { width: 100%; display: grid; gap: 10px; justify-items: center; }
+.stage-controls > .btn { width: 100%; max-width: 320px; }
+
+/* 拭く */
+.smudge__base { fill: var(--smudge); opacity: 0.55; }
+.smudge__spot { fill: var(--smudge); opacity: 0.45; }
+
+/* 埃 */
+.dust__speck { fill: #3a2f2a; stroke: #fff; stroke-width: 1; }
+.dust { transition: opacity 0.2s, transform 0.2s; }
+.dust.is-removed { opacity: 0; }
+
+/* フィルム */
+.film__sheet { fill: rgba(255, 255, 255, 0.35); stroke: rgba(255, 255, 255, 0.95); stroke-width: 1.2; }
+.film { transition: transform 0.12s ease-out; }
+.film.is-falling, .corner.is-falling {
+  animation: film-fall 0.9s ease-in forwards;
+  transform-box: view-box;
+  transform-origin: 50% 50%;
 }
-.stage-controls { width: 100%; display: grid; gap: 10px; }
-.dev-slider { display: flex; align-items: center; gap: 8px; font-size: 13px; color: var(--ink-soft); }
-.dev-slider input { flex: 1; }
-.dev-slider output { min-width: 3em; text-align: right; font-variant-numeric: tabular-nums; }
+@keyframes film-fall {
+  to { transform: translate(30px, 460px) rotate(25deg); opacity: 0; }
+}
+
+/* 位置合わせ */
+.align-controls { display: flex; align-items: center; gap: 16px; width: 100%; max-width: 320px; }
+.align-controls > .btn--primary { flex: 1; }
+.dpad {
+  display: grid;
+  grid-template-columns: repeat(3, 48px);
+  grid-template-rows: repeat(3, 48px);
+  grid-template-areas: '. up .' 'left . right' '. down .';
+  gap: 2px;
+}
+.btn--pad { padding: 0; min-height: 0; font-size: 16px; border-radius: 12px; }
+.pad-up { grid-area: up; }
+.pad-down { grid-area: down; }
+.pad-left { grid-area: left; }
+.pad-right { grid-area: right; }
+
+/* 仮固定 */
+.corner__target { fill: rgba(255, 255, 255, 0.25); stroke: #fff; stroke-width: 1.5; stroke-dasharray: 3 2; }
+.corner.is-active .corner__target { fill: var(--yellow); stroke: var(--line); stroke-dasharray: none; }
+.corner.is-perfect .corner__target { fill: var(--accent); stroke: #fff; stroke-dasharray: none; }
+.corner.is-good .corner__target { fill: #7ee08a; stroke: #fff; stroke-dasharray: none; }
+.corner.is-bad .corner__target { fill: #ffb347; stroke: #fff; stroke-dasharray: none; }
+.corner.is-miss .corner__target { fill: var(--danger); stroke: #fff; stroke-dasharray: none; }
+.ring { fill: none; stroke: var(--primary); stroke-width: 3; opacity: 0; }
+.ring.is-visible { opacity: 1; }
+.judge { font-size: 16px; font-weight: 900; fill: #fff; stroke: var(--line); stroke-width: 3; paint-order: stroke; }
+.judge.is-miss { fill: var(--danger); }
+
+/* 気泡 */
+.bubble__body { fill: rgba(255, 255, 255, 0.45); stroke: #fff; stroke-width: 1.5; }
+.bubble__shine { fill: #fff; }
+.bubble { transition: opacity 0.25s; }
+.bubble.is-out { opacity: 0; }
 
 /* Phone illustration */
 .phone { display: block; width: 100%; height: auto; }

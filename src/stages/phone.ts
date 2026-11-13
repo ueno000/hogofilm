@@ -1,21 +1,18 @@
-const NS = 'http://www.w3.org/2000/svg';
+import { svgEl } from './svg';
 
-function svgEl<K extends keyof SVGElementTagNameMap>(
-  tag: K,
-  attrs: Record<string, string | number>,
-): SVGElementTagNameMap[K] {
-  const el = document.createElementNS(NS, tag);
-  for (const [k, v] of Object.entries(attrs)) el.setAttribute(k, String(v));
-  return el;
-}
+/** スマホの画面部分（200×400 の座標系）。各工程はこの範囲で判定する。 */
+export const SCREEN = { x: 14, y: 22, w: 172, h: 356 } as const;
+export const NOTCH = { x: 78, y: 30, w: 44, h: 10 } as const;
 
-/** 工程画面の土台になるスマホのイラスト（200×400 の座標系）。 */
+export type Area = { x: number; y: number; w: number; h: number };
+
+/** 工程画面の土台になるスマホのイラスト。 */
 export function phoneSvg(): SVGSVGElement {
   const svg = svgEl('svg', { viewBox: '0 0 200 400', class: 'phone', 'aria-hidden': 'true' });
   svg.append(
     svgEl('rect', { x: 4, y: 4, width: 192, height: 392, rx: 30, class: 'phone__body' }),
-    svgEl('rect', { x: 14, y: 22, width: 172, height: 356, rx: 20, class: 'phone__screen' }),
-    svgEl('rect', { x: 78, y: 30, width: 44, height: 10, rx: 5, class: 'phone__notch' }),
+    svgEl('rect', { x: SCREEN.x, y: SCREEN.y, width: SCREEN.w, height: SCREEN.h, rx: 20, class: 'phone__screen' }),
+    svgEl('rect', { x: NOTCH.x, y: NOTCH.y, width: NOTCH.w, height: NOTCH.h, rx: 5, class: 'phone__notch' }),
   );
   return svg;
 }
