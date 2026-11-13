@@ -9,8 +9,12 @@ WIPE_MAX_DIRT,3,段,拭く,しつこい汚れの最大段数
 WIPE_SCRATCH_RUBS,5,回,拭く,この回数こするとその場所の基板が見える
 WIPE_DAMAGE_PENALTY,1.5,倍,拭く,削れた割合に掛ける減点倍率
 WIPE_EXPOSE_LIMIT,0.1,割合,拭く,基板が見える場所がこの割合を超えると「研磨しすぎあり」
-DUST_COUNT,7,個,埃取り,埃の数
+DUST_COUNT,5,個,埃取り,最初に置く埃の数（そのあとは降り続ける）
 DUST_HIT_MARGIN,14,SVG座標,埃取り,埃の当たり判定に足す余裕
+DUST_SPAWN_START,900,ms,埃取り,埃が降ってくる間隔（工程の開始時）
+DUST_SPAWN_MIN,450,ms,埃取り,埃が降ってくる間隔の最短
+DUST_SPAWN_RAMP_MS,10000,ms,埃取り,開始から最短の間隔になるまでの時間
+DUST_PENALTY,0.15,割合,埃取り,「貼り始める」を押したときに残っている埃1個あたりの減点
 ALIGN_STEP,3,SVG座標,位置合わせ,方向ボタン1回で動く量
 ALIGN_MAX_START_STEPS,6,段,位置合わせ,開始時のずれの最大段数
 ALIGN_LIMIT_STEPS,10,段,位置合わせ,動かせる範囲

@@ -184,8 +184,19 @@ h1, h2, p { margin: 0; }
 
 /* 埃 */
 .dust__speck { fill: #3a2f2a; stroke: #fff; stroke-width: 1; }
-.dust { transition: opacity 0.2s, transform 0.2s; }
+.dust { transition: opacity 0.2s; }
 .dust.is-removed { opacity: 0; }
+/* 上から降ってくる見た目（判定はすぐ着地扱い。D-3 の承認後に見直す） */
+.dust.is-falling .dust__speck { animation: dust-fall 0.3s ease-in; }
+@keyframes dust-fall {
+  from { transform: translateY(-40px); opacity: 0; }
+  to { transform: translateY(0); opacity: 1; }
+}
+.stage-status.is-now { color: var(--primary); font-size: 22px; animation: now-pop 0.5s ease-in-out infinite alternate; }
+@keyframes now-pop {
+  from { transform: scale(1); }
+  to { transform: scale(1.12); }
+}
 
 /* フィルム */
 .film__sheet { fill: rgba(255, 255, 255, 0.35); stroke: rgba(255, 255, 255, 0.95); stroke-width: 1.2; }
