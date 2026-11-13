@@ -1,6 +1,14 @@
 import { h } from '../dom';
-import { getRank } from '../game/ranks';
-import { buildShareText, buildXIntentUrl, formatSeconds } from '../game/share';
+import { interimRank } from '../game/ranks';
+import {
+  AXIS_LABEL,
+  AXIS_ORDER,
+  buildShareText,
+  buildXIntentUrl,
+  formatSeconds,
+  incidentNames,
+  TIER_LABEL,
+} from '../game/share';
 import type { GameOutcome } from '../game/types';
 import type { Scene } from './scene';
 
@@ -12,23 +20,32 @@ const REASON_LABEL: Record<GameOutcome['reason'], string> = {
 const DROPPED_LABEL = 'フィルムを床に落とした…';
 
 export const resultScene = (outcome: GameOutcome): Scene => (root, nav) => {
-  const rank = getRank(outcome.score);
+  const rank = interimRank(outcome.scores);
+  const incidents = incidentNames(outcome.incidents);
   const share = () => {
     const url = location.protocol.startsWith('http') ? location.href.split('#')[0] : undefined;
     window.open(buildXIntentUrl(buildShareText(outcome, url)), '_blank', 'noopener');
   };
+  const dropped = outcome.incidents.dropped;
 
   root.append(
-    h('main', { class: `screen screen--result is-${outcome.reason}${outcome.dropped ? ' is-dropped' : ''}` },
-      h('p', { class: 'eyebrow' }, outcome.dropped ? DROPPED_LABEL : REASON_LABEL[outcome.reason]),
-      h('div', { class: 'score' },
-        h('span', { class: 'score__label' }, '品質スコア'),
-        h('span', { class: 'score__value' }, String(outcome.score)),
-        h('span', { class: 'score__unit' }, '点'),
+    h('main', { class: `screen screen--result is-${outcome.reason}${dropped ? ' is-dropped' : ''}` },
+      h('p', { class: 'eyebrow' }, dropped ? DROPPED_LABEL : REASON_LABEL[outcome.reason]),
+      h('dl', { class: 'axes' },
+        ...AXIS_ORDER.map((axis) =>
+          h('div', { class: `axis is-${outcome.tiers[axis]}` },
+            h('dt', { class: 'axis__label' }, AXIS_LABEL[axis]),
+            h('dd', { class: 'axis__value' },
+              h('span', { class: 'axis__score' }, String(outcome.scores[axis])),
+              h('span', { class: 'axis__unit' }, '点'),
+              h('span', { class: 'axis__tier' }, TIER_LABEL[outcome.tiers[axis]]),
+            ),
+          ),
+        ),
       ),
+      incidents.length ? h('p', { class: 'incidents' }, `事件：${incidents.join('・')}`) : null,
       h('p', { class: 'remain' }, `残り時間 ${formatSeconds(outcome.remainingMs)}秒`),
       h('div', { class: 'rank' },
-        h('p', { class: 'rank__no' }, `No.${rank.no}`),
         h('h2', { class: 'rank__title' }, rank.title),
         h('p', { class: 'rank__comment' }, rank.comment),
       ),

@@ -1,5 +1,5 @@
-import { STAGE_ORDER, type EndReason, type GameOutcome, type StageId, type StageResult } from './types';
-import { calcScore } from './score';
+import { STAGE_ORDER, type EndReason, type GameOutcome, type StageDetail, type StageId, type StageResult } from './types';
+import { evaluate } from './score';
 
 export const TIME_LIMIT_MS = 90_000;
 /** フィルムを落としたあと、残りの工程を自動で進める間隔（1工程あたり、ms） */
@@ -28,10 +28,10 @@ export class GameState {
     return this.filmDropped;
   }
 
-  completeStage(quality: number): void {
+  completeStage(quality: number, detail: StageDetail = {}): void {
     const stage = this.currentStage;
     if (!stage) return;
-    this.results.push({ stage, quality: Math.min(1, Math.max(0, quality)) });
+    this.results.push({ ...detail, stage, quality: Math.min(1, Math.max(0, quality)) });
     this.index += 1;
   }
 
@@ -43,12 +43,12 @@ export class GameState {
   }
 
   finish(reason: EndReason, remainingMs: number): GameOutcome {
+    const remaining = Math.max(0, remainingMs);
     return {
       reason,
       results: [...this.results],
-      remainingMs: Math.max(0, remainingMs),
-      dropped: this.filmDropped,
-      score: calcScore(this.results, this.filmDropped),
+      remainingMs: remaining,
+      ...evaluate(this.results, reason, remaining, this.filmDropped),
     };
   }
 }
