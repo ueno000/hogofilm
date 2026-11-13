@@ -10,7 +10,7 @@ export function buildShareText(outcome: GameOutcome, url?: string): string {
   const lines = [
     `保護フィルム貼りで品質${outcome.score}点！`,
     `称号「${rank.title}」`,
-    outcome.reason === 'dropped'
+    outcome.dropped
       ? 'フィルムを床に落としました…'
       : `残り時間 ${formatSeconds(outcome.remainingMs)}秒`,
     '#フィルム貼り職人',
