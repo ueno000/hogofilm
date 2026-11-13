@@ -4,7 +4,10 @@
 
 スマートフォンのブラウザですぐ遊べる、保護フィルム貼りゲーム。1プレイ約90秒、5工程（拭く → 埃取り → 位置合わせ → 仮固定 → 気泡抜き）の仕上がり品質と残り時間で評価する。
 
-- 企画・仕様の正本は [docs/game-plan.md](docs/game-plan.md)。仕様に関わる変更はここも合わせて更新する。
+- 仕様の正本は2つある。
+  - **ルール・流れ・文言・受け入れ条件**: [docs/game-plan.md](docs/game-plan.md)。仕様に関わる変更はここも合わせて更新する。
+  - **数値（調整パラメータ・配点・目安時間・称号のスコア帯）**: Google スプレッドシート「保護フィルム貼りゲーム 企画管理シート」。シートの仕様タブ（工程設計・調整パラメータ・称号）は開発セッションから編集しない。
+- 工程管理は GitHub Project「development」（https://github.com/users/ueno000/projects/1）で行う。管理の手順は [docs/management.md](docs/management.md)。
 - リモート: `ueno000/hogofilm`（GitHub）
 
 ## 技術スタックと制約
@@ -56,7 +59,14 @@ npm run build   # tsc --noEmit による型チェック + vite build
 1. `gh issue list` で未完了のチケットを確認し、今回の作業に対応する Issue を特定する。
 2. `gh issue view <番号> --comments` で本文とコメント履歴を読み、最新の仕様・決定事項を把握してから着手する。
 3. 対応する Issue がない作業は、着手前に Issue を作る（ラベル: `stage` / `ui` / `game-logic` / `test` / `release` / `bug` / `documentation` など）。
-4. Issue の内容と `docs/game-plan.md` が食い違う場合は、作業前にユーザーに確認する。
+4. Issue の内容と `docs/game-plan.md`・企画管理シートが食い違う場合は、作業前にユーザーに確認する。
+
+### Project（development）
+
+- Issue はすべて Project「development」に載せる。新しく起票したら `gh project item-add 1 --owner ueno000 --url <IssueのURL>` で追加する。
+- **Status**（Todo / In Progress / Done）が進捗の正。着手したら In Progress、PR がマージされたら Done にする。
+- **Track** で種類を分ける: `Spec`（仕様の実装）/ `Tech`（基盤・描画・テスト・リファクタリング）/ `Release`（公開・配信）。
+- シートの「進捗」タブは Project の写し。マネージャーが同期するので、開発セッションは書き換えない。
 
 ### 仕様が変わったとき
 
@@ -66,7 +76,9 @@ npm run build   # tsc --noEmit による型チェック + vite build
   - **変更内容**: 何がどう変わったか（変更前 → 変更後）
   - **理由**: なぜ変えたか（ユーザーの指示・プレイ確認の結果など）
   - **影響範囲**: 関係するファイル・工程・他の Issue
-- 仕様の正本である `docs/game-plan.md` も同じ変更で更新する。
+- ルール・文言の変更は、仕様の正本である `docs/game-plan.md` も同じ変更で更新する。
+- 調整パラメータなど数値を変えた場合は、シートを直接書き換えず、Issue コメントに変更前 → 変更後を書く。シートへの反映はユーザー（企画）とマネージャーが行う。
+- シート側で仕様が変わったときは、マネージャーが Issue にコメントまたは起票する（手順は [docs/management.md](docs/management.md)）。
 - 複数の Issue にまたがる変更は、それぞれの Issue にコメントし相互にリンクする（`#番号`）。
 
 ### 作業ブランチ・PR との紐付け
