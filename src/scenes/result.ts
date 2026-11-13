@@ -1,5 +1,5 @@
 import { h } from '../dom';
-import { interimRank } from '../game/ranks';
+import { getTitle } from '../game/ranks';
 import {
   AXIS_LABEL,
   AXIS_ORDER,
@@ -20,7 +20,7 @@ const REASON_LABEL: Record<GameOutcome['reason'], string> = {
 const DROPPED_LABEL = 'フィルムを床に落とした…';
 
 export const resultScene = (outcome: GameOutcome): Scene => (root, nav) => {
-  const rank = interimRank(outcome.scores);
+  const rank = getTitle(outcome.tiers, outcome.incidents);
   const incidents = incidentNames(outcome.incidents);
   const share = () => {
     const url = location.protocol.startsWith('http') ? location.href.split('#')[0] : undefined;
