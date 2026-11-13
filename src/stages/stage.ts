@@ -3,7 +3,7 @@ import type { StageId } from '../game/types';
 export interface StageContext {
   /** 工程完了。quality は 0〜1。 */
   complete(quality: number): void;
-  /** フィルムを落とした（即終了）。仮固定工程で使う。 */
+  /** フィルムを床に落とした。ゲームは続き、残りの工程は操作なしで進む。仮固定工程で使う。 */
   drop(): void;
 }
 
