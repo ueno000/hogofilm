@@ -7,19 +7,16 @@ import {
   buildXIntentUrl,
   formatSeconds,
   incidentNames,
+  resultHeading,
   TIER_LABEL,
 } from '../game/share';
-import type { GameOutcome } from '../game/types';
+import type { GameOutcome, ScoreAxis } from '../game/types';
 import type { Scene } from './scene';
 
-const REASON_LABEL: Record<GameOutcome['reason'], string> = {
-  completed: '貼り付け完了！',
-  timeout: '時間切れ！',
-};
-/** フィルムを落としたときの見出し（結果画面の作り直しは #24） */
-const DROPPED_LABEL = 'フィルムを床に落とした…';
-
 export const resultScene = (outcome: GameOutcome): Scene => (root, nav) => {
+  // 手早さには、点数の根拠として残り時間を小さく添える
+  const axisNote = (axis: ScoreAxis) =>
+    axis === 'speed' ? h('span', { class: 'axis__note' }, `残り ${formatSeconds(outcome.remainingMs)}秒`) : null;
   const rank = getTitle(outcome.tiers, outcome.incidents);
   const incidents = incidentNames(outcome.incidents);
   const share = () => {
@@ -30,11 +27,11 @@ export const resultScene = (outcome: GameOutcome): Scene => (root, nav) => {
 
   root.append(
     h('main', { class: `screen screen--result is-${outcome.reason}${dropped ? ' is-dropped' : ''}` },
-      h('p', { class: 'eyebrow' }, dropped ? DROPPED_LABEL : REASON_LABEL[outcome.reason]),
+      h('p', { class: 'eyebrow' }, resultHeading(outcome)),
       h('dl', { class: 'axes' },
         ...AXIS_ORDER.map((axis) =>
           h('div', { class: `axis is-${outcome.tiers[axis]}` },
-            h('dt', { class: 'axis__label' }, AXIS_LABEL[axis]),
+            h('dt', { class: 'axis__label' }, AXIS_LABEL[axis], axisNote(axis)),
             h('dd', { class: 'axis__value' },
               h('span', { class: 'axis__score' }, String(outcome.scores[axis])),
               h('span', { class: 'axis__unit' }, '点'),
@@ -44,7 +41,6 @@ export const resultScene = (outcome: GameOutcome): Scene => (root, nav) => {
         ),
       ),
       incidents.length ? h('p', { class: 'incidents' }, `事件：${incidents.join('・')}`) : null,
-      h('p', { class: 'remain' }, `残り時間 ${formatSeconds(outcome.remainingMs)}秒`),
       h('div', { class: 'rank' },
         h('h2', { class: 'rank__title' }, rank.title),
         h('p', { class: 'rank__comment' }, rank.comment),
