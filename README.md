@@ -60,6 +60,8 @@ docs/
 | 作業の単位・仕様変更の経緯 | [Issues](https://github.com/ueno000/hogofilm/issues) |
 | 進捗（Status / Track） | [Project「development」](https://github.com/users/ueno000/projects/1) |
 
+調整値は `src/params.csv` から読み込みます。企画管理シートの「パラメータCSV」タブを CSV でダウンロードして上書きすれば差し替えられます（手順は [docs/management.md](docs/management.md#調整値の-csvパラメータcsv-タブ)）。
+
 仕様シートの変更を Issue と Project に反映する手順は [docs/management.md](docs/management.md) にあります。
 
 ## ブランチと PR
