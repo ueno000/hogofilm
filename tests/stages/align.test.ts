@@ -5,6 +5,7 @@ import {
   ALIGN_HOLD_SPEED_MAX,
   ALIGN_HOLD_SPEED_START,
   ALIGN_LIMIT,
+  ALIGN_SHAKE_VISUAL,
   ALIGN_START_MAX,
   ALIGN_TAP_STEP,
   ALIGN_TOLERANCE,
@@ -13,6 +14,7 @@ import {
   createAlign,
   holdDistance,
   moveFilm,
+  shakeOffset,
 } from '../../src/stages/logic/align';
 import { seededRng } from '../../src/stages/logic/random';
 
@@ -51,7 +53,7 @@ describe('動かし方', () => {
   it('長押しは待ち時間のあとで動き出し、だんだん速くなって最高速度で一定になる', () => {
     const d = (ms: number) => holdDistance(ALIGN_HOLD_DELAY_MS + ms);
     // 動き出した直後は開始時の速さ
-    expect(d(1) - d(0)).toBeCloseTo(ALIGN_HOLD_SPEED_START / 1000, 4);
+    expect((d(0.01) - d(0)) / 0.01).toBeCloseTo(ALIGN_HOLD_SPEED_START / 1000, 4);
     // 加速の途中はだんだん速くなる
     expect(d(400) - d(300)).toBeGreaterThan(d(200) - d(100));
     // 最高速度に達したあとは一定
@@ -73,5 +75,30 @@ describe('品質', () => {
     expect(alignQuality({ x: 3, y: 4 })).toBeCloseTo(1 - 5 / ALIGN_TOLERANCE);
     expect(alignQuality({ x: ALIGN_TOLERANCE, y: 0 })).toBe(0);
     expect(alignQuality({ x: 30, y: 30 })).toBe(0);
+  });
+});
+
+describe('手ブレ', () => {
+  it('揺れは縦横それぞれ揺れ幅を超えず、時間とともに変わる', () => {
+    const seen = new Set<string>();
+    for (let t = 0; t < 10_000; t += 7) {
+      const s = shakeOffset(t);
+      expect(Math.abs(s.x)).toBeLessThanOrEqual(ALIGN_SHAKE_VISUAL + 1e-9);
+      expect(Math.abs(s.y)).toBeLessThanOrEqual(ALIGN_SHAKE_VISUAL + 1e-9);
+      seen.add(`${s.x.toFixed(2)},${s.y.toFixed(2)}`);
+    }
+    expect(seen.size).toBeGreaterThan(100);
+  });
+
+  it('揺れ幅が0なら揺れない', () => {
+    expect(shakeOffset(1234, 0)).toEqual({ x: 0, y: 0 });
+  });
+
+  it('品質は揺れを含まない本当の位置で決まる', () => {
+    const s = { x: 3, y: 4 };
+    const before = alignQuality(s);
+    for (let t = 0; t < 2000; t += 50) shakeOffset(t);
+    expect(alignQuality(s)).toBe(before);
+    expect(before).toBeCloseTo(1 - 5 / ALIGN_TOLERANCE);
   });
 });

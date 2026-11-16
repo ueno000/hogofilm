@@ -17,6 +17,8 @@ export const ALIGN_START_MAX = param('ALIGN_START_MAX');
 export const ALIGN_LIMIT = param('ALIGN_LIMIT');
 /** このずれ量で品質 0（SVG 座標単位） */
 export const ALIGN_TOLERANCE = param('ALIGN_TOLERANCE');
+/** 手ブレの揺れ幅（SVG 座標単位）。見た目だけで判定には使わない（A-3） */
+export const ALIGN_SHAKE_VISUAL = param('ALIGN_SHAKE_VISUAL');
 
 /** 開始時のずれの最小（SVG 座標単位）。最初から合っていると工程にならない */
 const MIN_START_ERROR = 8;
@@ -83,7 +85,29 @@ export function alignError(s: AlignState): number {
   return Math.hypot(s.x, s.y);
 }
 
-/** 品質（A-5）: 1 − ずれ ÷ 許容量 */
+/** 品質（A-5）: 1 − ずれ ÷ 許容量。手ブレ（A-3）は含めない */
 export function alignQuality(s: AlignState): number {
   return clamp(1 - alignError(s) / ALIGN_TOLERANCE, 0, 1);
+}
+
+/**
+ * 手ブレの揺れ（A-3）。見た目だけに足し、判定には使わない。
+ * 周期の違う揺れを重ねて、手が震えているような不規則な動きにする。
+ * 縦横それぞれ、揺れ幅 amplitude を超えない。
+ */
+const SHAKE_X: readonly (readonly [number, number, number])[] = [
+  // [重み, 速さ（rad/ms）, 位相]
+  [0.6, 0.0071, 0],
+  [0.3, 0.0173, 1.3],
+  [0.1, 0.0419, 2.1],
+];
+const SHAKE_Y: readonly (readonly [number, number, number])[] = [
+  [0.6, 0.0059, 0.7],
+  [0.3, 0.0151, 2.4],
+  [0.1, 0.0373, 0.4],
+];
+
+export function shakeOffset(timeMs: number, amplitude = ALIGN_SHAKE_VISUAL): { x: number; y: number } {
+  const sum = (waves: typeof SHAKE_X) => waves.reduce((acc, [w, f, p]) => acc + w * Math.sin(timeMs * f + p), 0);
+  return { x: amplitude * sum(SHAKE_X), y: amplitude * sum(SHAKE_Y) };
 }

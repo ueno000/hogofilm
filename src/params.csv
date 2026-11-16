@@ -23,6 +23,7 @@ ALIGN_HOLD_ACCEL_MS,600,ms,位置合わせ,動き出してから最高速度に�
 ALIGN_START_MAX,30,SVG座標,位置合わせ,開始時のずれの最大（縦横それぞれ）
 ALIGN_LIMIT,40,SVG座標,位置合わせ,動かせる範囲（縦横それぞれ）
 ALIGN_TOLERANCE,18,SVG座標,位置合わせ,このずれ量で品質 0
+ALIGN_SHAKE_VISUAL,2,SVG座標,位置合わせ,手ブレの揺れ幅（見た目のみ、判定には使わない）
 RING_START,44,SVG座標,仮固定,リングの開始半径
 RING_DURATION,1000,ms,仮固定,リングが 0 まで縮む時間
 RING_TARGET,12,SVG座標,仮固定,目標マーカーの半径
