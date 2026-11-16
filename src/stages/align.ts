@@ -1,5 +1,6 @@
 import { h } from '../dom';
 import { filmGroup } from './film';
+import { handsGroup } from './hands';
 import { createStageView } from './shell';
 import type { Stage } from './stage';
 import { alignQuality, createAlign, holdDistance, moveFilm, shakeOffset, type AlignState, type Direction } from './logic/align';
@@ -32,6 +33,8 @@ export const alignStage: Stage = {
     let done = false;
 
     const film = filmGroup();
+    // 手でつまんで持っている絵。フィルムの中に入れて、一緒に動かし一緒に揺らす（A-3）
+    film.append(handsGroup());
     view.layer.append(film);
 
     // ずれの表示や「ぴったり」の演出は出さない。合っているかは結果画面で分かる（A-4）
