@@ -138,7 +138,7 @@ h1, h2, p { margin: 0; }
 
 /* HUD */
 .screen--play { gap: 10px; }
-.hud { width: 100%; display: grid; gap: 6px; }
+.hud { width: 100%; display: grid; gap: 6px; position: relative; }
 .hud__row { display: flex; align-items: center; gap: 8px; font-weight: 800; }
 .hud__step {
   background: var(--yellow);
@@ -151,7 +151,63 @@ h1, h2, p { margin: 0; }
 .hud__time { font-variant-numeric: tabular-nums; min-width: 4.5em; text-align: right; }
 .hud__time.is-danger { color: var(--danger); }
 .hud__bar { height: 10px; border: 2px solid var(--line); border-radius: 999px; overflow: hidden; background: var(--card); }
-.hud__bar-fill { height: 100%; background: var(--accent); transform-origin: left; }
+.hud__bar-fill { height: 100%; background: var(--time-normal); transform-origin: left; transition: background-color 0.3s; }
+
+/* 時間演出（U-1〜U-4）: ゲージの色は 通常（緑）→ 半分経過（黄）→ 残りわずか（赤） */
+:root { --time-normal: #4fd27a; }
+.hud[data-phase='warn'] .hud__bar-fill { background: var(--yellow); }
+.hud[data-phase='danger'] .hud__bar-fill { background: var(--danger); }
+/* 半分を過ぎた瞬間に一度ぴょんと跳ねる */
+.hud__bar.is-hop { animation: bar-hop 0.45s ease-out; }
+@keyframes bar-hop {
+  0% { transform: translateY(0); }
+  35% { transform: translateY(-7px) scaleY(1.25); }
+  70% { transform: translateY(1px); }
+  100% { transform: translateY(0); }
+}
+/* 「半分経過！」「残り10秒！」。HUD の中だけに、操作のじゃまにならないよう重ねて出す */
+.hud__notice {
+  position: absolute;
+  left: 50%;
+  /* 工程名の行に重ねる（HUD からはみ出さない） */
+  top: 0;
+  margin: 0;
+  padding: 2px 12px;
+  border: 2px solid var(--line);
+  border-radius: 999px;
+  background: var(--yellow);
+  color: #2b2140;
+  font-weight: 900;
+  white-space: nowrap;
+  pointer-events: none;
+  opacity: 0;
+  transform: translate(-50%, 0) scale(0.6);
+  transition: opacity 0.15s, transform 0.15s;
+  z-index: 2;
+}
+.hud__notice.is-shown { opacity: 1; transform: translate(-50%, 0) scale(1); }
+.hud[data-phase='danger'] .hud__notice { background: var(--danger); color: #fff; }
+/* 残りわずか: 秒数を大きくし、ゲージと秒数が1秒ごとに脈打つ */
+.hud__time.is-danger { font-size: 22px; }
+.hud__time.is-pulse, .hud__bar.is-pulse { animation: time-pulse 0.4s ease-out; }
+@keyframes time-pulse {
+  0% { transform: scale(1.18); }
+  100% { transform: scale(1); }
+}
+/* 残りわずか: 画面の外枠がうっすら赤く点滅する */
+.screen--play.is-danger::after {
+  content: '';
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  box-shadow: inset 0 0 0 4px rgba(255, 107, 61, 0.55), inset 0 0 28px rgba(255, 107, 61, 0.45);
+  animation: frame-flash 1s ease-in-out infinite;
+  z-index: 10;
+}
+@keyframes frame-flash {
+  0%, 100% { opacity: 0.25; }
+  50% { opacity: 1; }
+}
 
 /* Stage */
 .stage-area { width: 100%; flex: 1; display: flex; flex-direction: column; align-items: center; gap: 10px; min-height: 0; }
