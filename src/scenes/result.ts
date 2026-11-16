@@ -3,11 +3,14 @@ import { getTitle } from '../game/ranks';
 import {
   AXIS_LABEL,
   AXIS_ORDER,
+  buildCopyText,
   buildShareText,
   buildXIntentUrl,
   formatSeconds,
+  gameUrl,
   incidentNames,
   resultHeading,
+  SHARE_COPIED_MS,
   TIER_LABEL,
 } from '../game/share';
 import type { GameOutcome, ScoreAxis } from '../game/types';
@@ -20,9 +23,41 @@ export const resultScene = (outcome: GameOutcome): Scene => (root, nav) => {
     axis === 'speed' ? h('span', { class: 'axis__note' }, `残り ${formatSeconds(outcome.remainingMs)}秒`) : null;
   const rank = getTitle(outcome.tiers, outcome.incidents);
   const incidents = incidentNames(outcome.incidents);
+  const url = gameUrl(location.href, location.protocol);
   const share = () => {
-    const url = location.protocol.startsWith('http') ? location.href.split('#')[0] : undefined;
     window.open(buildXIntentUrl(buildShareText(outcome, url)), '_blank', 'noopener');
+  };
+
+  // 「コピー」: シェア文とURLをクリップボードにコピーする（R-7）
+  const copied = h('p', { class: 'copied', role: 'status', 'aria-live': 'polite' }, 'コピーしました');
+  let copiedTimer = 0;
+  const showCopied = () => {
+    copied.classList.add('is-shown');
+    clearTimeout(copiedTimer);
+    copiedTimer = window.setTimeout(() => copied.classList.remove('is-shown'), SHARE_COPIED_MS);
+  };
+  // コピーできない端末では、シェア文を選択できる形で出す
+  const fallbackText = h('textarea', { class: 'copy-fallback__text', readonly: true, rows: 6 });
+  const fallback = h('div', { class: 'copy-fallback', role: 'dialog', 'aria-label': 'シェア文', hidden: true },
+    h('p', { class: 'copy-fallback__note' }, 'コピーできませんでした。下の文を長押しして選んでください。'),
+    fallbackText,
+    h('button', { class: 'btn', onclick: () => (fallback.hidden = true) }, '閉じる'),
+  );
+  const showFallback = (text: string) => {
+    fallbackText.value = text;
+    fallback.hidden = false;
+    fallbackText.focus();
+    fallbackText.select();
+  };
+  const copy = async () => {
+    const text = buildCopyText(outcome, url);
+    try {
+      if (!navigator.clipboard?.writeText) throw new Error('clipboard unavailable');
+      await navigator.clipboard.writeText(text);
+      showCopied();
+    } catch {
+      showFallback(text);
+    }
   };
   const dropped = outcome.incidents.dropped;
 
@@ -49,12 +84,19 @@ export const resultScene = (outcome: GameOutcome): Scene => (root, nav) => {
         h('p', { class: 'rank__comment' }, rank.comment),
       ),
       h('div', { class: 'actions' },
-        h('button', { class: 'btn btn--x', onclick: share }, 'Xでシェア'),
+        h('div', { class: 'actions actions--row share-row' },
+          h('button', { class: 'btn btn--x', onclick: share }, 'Xでシェア'),
+          h('button', { class: 'btn btn--copy', onclick: copy }, 'コピー'),
+          copied,
+        ),
         h('div', { class: 'actions actions--row' },
           h('button', { class: 'btn btn--primary', onclick: () => nav.toPlay() }, 'もう一度'),
           h('button', { class: 'btn', onclick: () => nav.toTitle() }, 'タイトルへ'),
         ),
       ),
+      fallback,
     ),
   );
+
+  return () => clearTimeout(copiedTimer);
 };
