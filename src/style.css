@@ -237,6 +237,24 @@ h1, h2, p { margin: 0; }
 .board__base { fill: #1f7a3d; }
 .board__trace { fill: none; stroke: #d8b44a; stroke-width: 1.4; }
 .board__pad { fill: #d8b44a; }
+/* ウェットシート（W-8）。離している間は画面の右下の横に置く（スマホの外へはみ出して描く） */
+.playfield[data-stage='wipe'] { overflow: clip; }
+.playfield[data-stage='wipe'] .phone { overflow: visible; }
+.wet-sheet { pointer-events: none; }
+.wet-sheet__back { fill: #b9dceb; stroke: #2b2140; stroke-width: 1.5; }
+.wet-sheet__cloth { fill: #f4fbff; stroke: #2b2140; stroke-width: 1.5; }
+.wet-sheet__fold { stroke: #9cc7da; stroke-width: 1.4; }
+.wet-sheet__crease { fill: none; stroke: #cfe6f0; stroke-width: 1.2; stroke-linecap: round; }
+.wet-sheet__drop { fill: #7fd0f5; }
+/* 拭いている間は少し持ち上げたように影を付ける */
+.wet-sheet.is-wiping .wet-sheet__body { filter: drop-shadow(0 2px 0 rgba(43, 33, 64, 0.35)); }
+/* 拭いた跡が濡れて光り、少しして乾く（見た目だけ） */
+.wet-trail { pointer-events: none; }
+.wet-trail__mark { fill: rgba(255, 255, 255, 0.55); animation: wet-dry linear forwards; }
+@keyframes wet-dry {
+  from { opacity: 0.8; }
+  to { opacity: 0; }
+}
 
 /* 埃 */
 .dust__speck { fill: #3a2f2a; stroke: #fff; stroke-width: 1; }

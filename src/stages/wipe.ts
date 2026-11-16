@@ -1,21 +1,21 @@
 import { SCREEN } from './phone';
-import { createStageView, nextButton, pct } from './shell';
+import { createStageView, nextButton } from './shell';
 import { svgEl, trackPointer } from './svg';
 import type { Stage } from './stage';
 import {
   beginStroke,
   cellCenter,
-  cleanRatio,
   createWipe,
   endStroke,
   isScratched,
   rubAt,
   rubLine,
   scratchedRatio,
-  WIPE_DONE,
   WIPE_MAX_DIRT,
+  WIPE_RADIUS,
   wipeQuality,
 } from './logic/wipe';
+import { sheetTilt, wetMarks, WIPE_SHEET_DRY_MS } from './logic/wipeSheet';
 
 /** 汚れ1段あたりの不透明度 */
 export const DIRT_OPACITY_PER_LEVEL = 0.2;
@@ -25,6 +25,29 @@ export const DIRT_BLUR = 5;
 export const DIRT_SPREAD = 0.8;
 /** 基板の模様1枚の大きさ（SVG 座標単位） */
 const CIRCUIT_TILE = 24;
+/** 指を離している間、ウェットシートを置いておく場所（画面の右下の横。SVG 座標） */
+const SHEET_REST = { x: 214, y: 320, tilt: -14 };
+/** 濡れた光りを置く間隔（指の半径に対する割合） */
+const WET_SPACING_RATIO = 0.6;
+
+/**
+ * 折りたたんだウェットシートの絵（W-8）。原点が指の位置で、大きさは指の半径 WIPE_RADIUS に合わせる。
+ */
+function sheetArt(): SVGGElement {
+  const r = WIPE_RADIUS;
+  const g = svgEl('g', { class: 'wet-sheet', 'aria-hidden': 'true' });
+  const inner = svgEl('g', { class: 'wet-sheet__body' });
+  inner.append(
+    svgEl('rect', { x: -r * 1.05, y: -r * 0.8, width: r * 2.1, height: r * 1.6, rx: 4, class: 'wet-sheet__back' }),
+    svgEl('rect', { x: -r, y: -r * 0.75, width: r * 2, height: r * 1.5, rx: 4, class: 'wet-sheet__cloth' }),
+    // 折り目と、布の凹凸
+    svgEl('path', { d: `M${-r} ${-r * 0.1} H${r}`, class: 'wet-sheet__fold' }),
+    svgEl('path', { d: `M${-r * 0.6} ${r * 0.35} q ${r * 0.3} -${r * 0.15} ${r * 0.6} 0 t ${r * 0.6} 0`, class: 'wet-sheet__crease' }),
+    svgEl('circle', { cx: r * 0.55, cy: -r * 0.45, r: 1.6, class: 'wet-sheet__drop' }),
+  );
+  g.append(inner);
+  return g;
+}
 
 /** 削れた場所に見せる基板の模様（緑の地に回路の線）。結果画面の絵でも使う */
 export function circuitPattern(id = 'wipe-circuit'): SVGPatternElement {
@@ -103,27 +126,74 @@ export const wipeStage: Stage = {
       return rect;
     });
     clipped.append(smudge);
+    // 拭いた跡の濡れた光り（見た目だけ。判定には使わない）
+    const wet = svgEl('g', { class: 'wet-trail' });
+    clipped.append(wet);
     view.layer.append(defs, clipped);
 
+    // 指の位置に出すウェットシート。離している間は画面の横に置いておく（W-8）
+    const sheet = sheetArt();
+    view.layer.append(sheet);
+    let tilt = 0;
+    const placeSheet = (x: number, y: number, deg: number) => {
+      sheet.setAttribute('transform', `translate(${x.toFixed(1)} ${y.toFixed(1)}) rotate(${deg.toFixed(1)})`);
+    };
+    const restSheet = () => {
+      tilt = 0;
+      sheet.classList.remove('is-wiping');
+      placeSheet(SHEET_REST.x, SHEET_REST.y, SHEET_REST.tilt);
+    };
+    restSheet();
+
+    const wetTimers = new Set<number>();
+    let wetCarry = 0;
+    const addWet = (x: number, y: number) => {
+      const mark = svgEl('circle', {
+        cx: x.toFixed(1),
+        cy: y.toFixed(1),
+        r: WIPE_RADIUS.toFixed(1),
+        class: 'wet-trail__mark',
+        style: `animation-duration: ${WIPE_SHEET_DRY_MS}ms`,
+      });
+      wet.append(mark);
+      const id = window.setTimeout(() => {
+        mark.remove();
+        wetTimers.delete(id);
+      }, WIPE_SHEET_DRY_MS);
+      wetTimers.add(id);
+    };
+
+    // きれいさの割合は表示しない。拭き残しは目で見て判断する（W-9）
     const render = () => {
       state.dirt.forEach((level, i) => {
         cells[i].setAttribute('opacity', (Math.min(level, WIPE_MAX_DIRT) * DIRT_OPACITY_PER_LEVEL).toFixed(2));
         boardCells[i].classList.toggle('is-exposed', isScratched(state, i));
       });
-      view.status.textContent = `きれいさ ${pct(Math.min(1, cleanRatio(state) / WIPE_DONE))}`;
     };
 
     const untrack = trackPointer(view.playfield, view.svg, {
       start: (p) => {
         if (done) return;
         beginStroke(state);
+        sheet.classList.add('is-wiping');
+        placeSheet(p.x, p.y, tilt);
+        wetCarry = 0;
+        addWet(p.x, p.y);
         if (rubAt(state, p.x, p.y)) render();
       },
       move: (p, prev) => {
         if (done) return;
+        tilt = sheetTilt(tilt, p.x - prev.x);
+        placeSheet(p.x, p.y, tilt);
+        const marks = wetMarks(prev.x, prev.y, p.x, p.y, WIPE_RADIUS * WET_SPACING_RATIO, wetCarry);
+        wetCarry = marks.carry;
+        marks.points.forEach((m) => addWet(m.x, m.y));
         if (rubLine(state, prev.x, prev.y, p.x, p.y)) render();
       },
-      end: () => endStroke(state),
+      end: () => {
+        endStroke(state);
+        restSheet();
+      },
     });
 
     view.controls.append(nextButton('次へ', () => {
@@ -133,6 +203,10 @@ export const wipeStage: Stage = {
     }, true));
     render();
 
-    return () => untrack();
+    return () => {
+      untrack();
+      wetTimers.forEach((id) => clearTimeout(id));
+      wetTimers.clear();
+    };
   },
 };
