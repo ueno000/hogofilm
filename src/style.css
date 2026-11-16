@@ -287,6 +287,12 @@ h1, h2, p { margin: 0; }
 .bubble__shine { fill: #fff; }
 .bubble { transition: opacity 0.25s; }
 .bubble.is-out { opacity: 0; }
+/* 速すぎて割れた気泡は、はじけたように一瞬ふくらんで縮む（B-1） */
+.bubble.is-split .bubble__body { animation: bubble-split 0.3s ease-out; transform-box: fill-box; transform-origin: 50% 50%; }
+@keyframes bubble-split {
+  0% { transform: scale(1.6); stroke: var(--danger); stroke-width: 2.5; }
+  100% { transform: scale(1); }
+}
 
 /* Phone illustration */
 .phone { display: block; width: 100%; height: auto; }
