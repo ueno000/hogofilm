@@ -4,8 +4,8 @@ import { param } from '../../game/params';
 
 /** 最初に置く埃の数。そのあとは1個ずつ降り続ける（D-1） */
 export const DUST_COUNT = param('DUST_COUNT');
-/** 埃の当たり判定に足す余裕（小さい埃もタップしやすく）。SVG 座標単位。 */
-export const DUST_HIT_MARGIN = param('DUST_HIT_MARGIN');
+/** 埃取りシールの半径（SVG 座標単位）。押した点を中心に、この円の中の埃をまとめて取る（D-6） */
+export const DUST_STICKER_RADIUS = param('DUST_STICKER_RADIUS');
 /** 埃が降ってくる間隔。開始時（ms） */
 export const DUST_SPAWN_START = param('DUST_SPAWN_START');
 /** 埃が降ってくる間隔の最短（ms） */
@@ -60,19 +60,19 @@ export function spawnInterval(elapsedMs: number): number {
   return DUST_SPAWN_START + (DUST_SPAWN_MIN - DUST_SPAWN_START) * t;
 }
 
-/** タップ位置に一番近い、まだ残っている埃（判定内のもの）を返す。 */
-export function hitDust(dusts: readonly Dust[], x: number, y: number, margin = DUST_HIT_MARGIN): Dust | undefined {
-  let best: Dust | undefined;
-  let bestDist = Infinity;
+/**
+ * 埃取りシールを (x, y) に押し当てる（D-6）。中心が円の中にある、まだ残っている埃をまとめて取る。
+ * 取った埃を返す。降っている途中の扱い（D-3）は提案のままなので、残っている埃はすべて対象にする。
+ */
+export function stickDust(dusts: readonly Dust[], x: number, y: number, radius = DUST_STICKER_RADIUS): Dust[] {
+  const picked: Dust[] = [];
   for (const d of dusts) {
     if (d.removed) continue;
-    const dist = Math.hypot(d.x - x, d.y - y);
-    if (dist <= d.r + margin && dist < bestDist) {
-      best = d;
-      bestDist = dist;
-    }
+    if (Math.hypot(d.x - x, d.y - y) > radius) continue;
+    d.removed = true;
+    picked.push(d);
   }
-  return best;
+  return picked;
 }
 
 export function remainingDust(dusts: readonly Dust[]): number {

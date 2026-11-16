@@ -266,6 +266,28 @@ h1, h2, p { margin: 0; }
   from { transform: translateY(-40px); opacity: 0; }
   to { transform: translateY(0); opacity: 1; }
 }
+/* 埃取りシール（D-6） */
+.sticker { pointer-events: none; }
+.sticker__sheet { fill: #ffffff; stroke: #2b2140; stroke-width: 1.5; }
+.sticker__glue { fill: #f1f6fb; }
+.sticker__shine { fill: none; stroke: #ffffff; stroke-width: 2; stroke-linecap: round; opacity: 0.9; }
+.sticker__dust { stroke-width: 0.6; }
+/* PC のカーソル代わりのシール。押し当てている間は隠す */
+.sticker--cursor { opacity: 0.85; transition: opacity 0.1s; }
+.sticker--cursor.is-hidden, .sticker--cursor.is-stamping { opacity: 0; }
+.playfield.has-sticker-cursor { cursor: none; }
+/* 押した瞬間に少しつぶれ、少しして浮き上がって消える */
+.sticker__body { transform-box: fill-box; transform-origin: 50% 50%; }
+.sticker--stamp.is-pressed .sticker__body { animation: sticker-press 0.25s ease-out; }
+.sticker--stamp.is-lifting { animation: sticker-lift 0.3s ease-in forwards; }
+@keyframes sticker-press {
+  0% { transform: scale(1.15); }
+  40% { transform: scale(1.08, 0.86); }
+  100% { transform: scale(1); }
+}
+@keyframes sticker-lift {
+  to { opacity: 0; }
+}
 .stage-status.is-now { color: var(--primary); font-size: 22px; animation: now-pop 0.5s ease-in-out infinite alternate; }
 @keyframes now-pop {
   from { transform: scale(1); }
