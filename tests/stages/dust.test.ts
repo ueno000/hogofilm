@@ -6,11 +6,12 @@ import {
   DUST_SPAWN_MIN,
   DUST_SPAWN_RAMP_MS,
   DUST_SPAWN_START,
+  DUST_STICKER_RADIUS,
   dustQuality,
-  hitDust,
   remainingDust,
   spawnDust,
   spawnInterval,
+  stickDust,
   type Dust,
 } from '../../src/stages/logic/dust';
 import { seededRng } from '../../src/stages/logic/random';
@@ -46,19 +47,30 @@ describe('降ってくる間隔', () => {
   });
 });
 
-describe('タップ', () => {
-  it('当たり判定は埃の半径＋余裕まで。外れは undefined', () => {
-    const ds = [dust(0, 50, 50, 2)];
-    expect(hitDust(ds, 50 + 2 + 10, 50, 10)?.id).toBe(0);
-    expect(hitDust(ds, 50 + 2 + 11, 50, 10)).toBeUndefined();
+describe('埃取りシール（D-6）', () => {
+  it('押した点を中心に、円の中にある埃をまとめて取る', () => {
+    const ds = [dust(0, 50, 50), dust(1, 60, 55), dust(2, 50, 50 + 20), dust(3, 50, 50 + 21)];
+    const picked = stickDust(ds, 50, 50, 20);
+    expect(picked.map((d) => d.id)).toEqual([0, 1, 2]);
+    expect(ds.map((d) => d.removed)).toEqual([true, true, true, false]);
   });
 
-  it('重なり判定では一番近い埃を取る。取った埃は再ヒットしない', () => {
-    const ds = [dust(0, 50, 50), dust(1, 60, 50)];
-    const hit = hitDust(ds, 58, 50, 14)!;
-    expect(hit.id).toBe(1);
-    hit.removed = true;
-    expect(hitDust(ds, 58, 50, 14)?.id).toBe(0);
+  it('円の中に埃がなければ何も取らない', () => {
+    const ds = [dust(0, 10, 10)];
+    expect(stickDust(ds, 100, 100, 20)).toEqual([]);
+    expect(ds[0].removed).toBe(false);
+  });
+
+  it('取った埃は、もう一度押しても取れない（残りの数に入らない）', () => {
+    const ds = [dust(0, 50, 50), dust(1, 150, 150)];
+    stickDust(ds, 50, 50, 20);
+    expect(stickDust(ds, 50, 50, 20)).toEqual([]);
+    expect(remainingDust(ds)).toBe(1);
+  });
+
+  it('半径は調整値 DUST_STICKER_RADIUS を使う', () => {
+    const ds = [dust(0, 50 + DUST_STICKER_RADIUS, 50), dust(1, 50 + DUST_STICKER_RADIUS + 1, 50)];
+    expect(stickDust(ds, 50, 50).map((d) => d.id)).toEqual([0]);
   });
 });
 
