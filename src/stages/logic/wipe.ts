@@ -128,7 +128,7 @@ export function cleanRatio(s: WipeState): number {
   return s.dirt.filter((d) => d === 0).length / s.dirt.length;
 }
 
-/** 削れて基板が見えているマスの割合。事件「研磨しすぎ」の判定（#21）でも使う */
+/** 削れて基板が見えているマスの割合。やらかし「研磨しすぎ」の判定（#21）でも使う */
 export function scratchedRatio(s: WipeState): number {
   return s.scrub.filter((n) => n >= WIPE_SCRATCH_RUBS).length / s.scrub.length;
 }

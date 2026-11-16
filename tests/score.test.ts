@@ -78,7 +78,7 @@ describe('段階（高・中・低）', () => {
   });
 });
 
-describe('事件', () => {
+describe('やらかし', () => {
   const wipe = (scratchedRatio: number): StageResult[] => [{ stage: 'wipe', quality: 1, scratchedRatio }];
 
   it(`研磨しすぎは削れた割合が${WIPE_EXPOSE_LIMIT * 100}%を超えたときだけ`, () => {
@@ -88,7 +88,7 @@ describe('事件', () => {
     expect(isOverPolished([])).toBe(false);
   });
 
-  it('evaluate は点数・段階・事件をまとめて返す', () => {
+  it('evaluate は点数・段階・やらかしをまとめて返す', () => {
     const results: StageResult[] = [
       { stage: 'wipe', quality: 0.8, scratchedRatio: 0.2 },
       { stage: 'dust', quality: 1 },
@@ -191,13 +191,13 @@ describe('share', () => {
     expect(text).toContain('画面の綺麗さ 90点');
     expect(text).toContain('フィルムの貼り方 85点');
     expect(text).toContain('称号「');
-    expect(text).not.toContain('事件');
+    expect(text).not.toContain('やらかし');
     expect(buildXIntentUrl(text)).toBe(`https://x.com/intent/post?text=${encodeURIComponent(text)}`);
   });
 
-  it('事件がついたときは投稿文に書く', () => {
+  it('やらかしがついたときは投稿文に書く', () => {
     const text = buildShareText(outcome({ incidents: { dropped: true, overPolished: true } }));
-    expect(text).toContain('事件：落下・研磨しすぎ');
+    expect(text).toContain('やらかし：落下・研磨しすぎ');
   });
 
   it('投稿文に総合の品質スコアは出さない', () => {
