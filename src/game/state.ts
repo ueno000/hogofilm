@@ -1,4 +1,12 @@
-import { STAGE_ORDER, type EndReason, type GameOutcome, type StageDetail, type StageId, type StageResult } from './types';
+import {
+  STAGE_ORDER,
+  type EndReason,
+  type FinishPicture,
+  type GameOutcome,
+  type StageDetail,
+  type StageId,
+  type StageResult,
+} from './types';
 import { evaluate } from './score';
 import { param } from './params';
 
@@ -11,6 +19,7 @@ export class GameState {
   readonly results: StageResult[] = [];
   private index = 0;
   private filmDropped = false;
+  private picture: FinishPicture = {};
 
   get currentStage(): StageId | undefined {
     return STAGE_ORDER[this.index];
@@ -27,6 +36,11 @@ export class GameState {
   /** フィルムを床に落としたか。落としたあとの工程は操作なしで進む */
   get dropped(): boolean {
     return this.filmDropped;
+  }
+
+  /** 工程の終わりの状態を、結果画面の絵のために残す（あとから来た項目で上書きする） */
+  recordPicture(part: FinishPicture): void {
+    this.picture = { ...this.picture, ...part };
   }
 
   completeStage(quality: number, detail: StageDetail = {}): void {
@@ -50,6 +64,7 @@ export class GameState {
       results: [...this.results],
       remainingMs: remaining,
       ...evaluate(this.results, reason, remaining, this.filmDropped),
+      picture: { ...this.picture },
     };
   }
 }

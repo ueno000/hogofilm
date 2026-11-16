@@ -3,7 +3,7 @@ import { GameState, TIME_LIMIT_MS } from '../game/state';
 import { CountdownTimer } from '../game/timer';
 import { formatSeconds } from '../game/share';
 import { phaseNotice, secondMark, timePhase, TIME_NOTICE_MS, type TimePhase } from '../game/timePhase';
-import { STAGE_ORDER, type EndReason } from '../game/types';
+import { STAGE_ORDER, type EndReason, type FinishPicture } from '../game/types';
 import { getStage } from '../stages';
 import { mountSkippedStage } from '../stages/skipped';
 import type { Scene } from './scene';
@@ -27,6 +27,13 @@ export const playScene: Scene = (root, nav) => {
 
   let unmountStage: (() => void) | void;
   let ended = false;
+  /** 今の工程の状態を返す関数（結果画面の絵に使う） */
+  let currentPicture: (() => FinishPicture) | undefined;
+  /** 今の工程の状態を残す。工程を終えたとき・落としたとき・時間切れの瞬間に呼ぶ（R-5） */
+  const savePicture = () => {
+    if (currentPicture) state.recordPicture(currentPicture());
+    currentPicture = undefined;
+  };
 
   // 時間演出（U-1〜U-4）。段階は残り時間の割合と秒数で決まる
   let phase: TimePhase = 'normal';
@@ -78,11 +85,13 @@ export const playScene: Scene = (root, nav) => {
     ended = true;
     const remaining = timer.stop();
     clearTimeout(noticeTimer);
+    savePicture();
     unmountStage?.();
     nav.toResult(state.finish(reason, remaining));
   }
 
   function mountCurrent(): void {
+    currentPicture = undefined;
     unmountStage?.();
     stageArea.replaceChildren();
     const id = state.currentStage;
@@ -102,13 +111,18 @@ export const playScene: Scene = (root, nav) => {
     }
 
     unmountStage = stage.mount(stageArea, {
+      picture: (get) => {
+        currentPicture = get;
+      },
       complete: (quality, detail) => {
         if (ended) return;
+        savePicture();
         state.completeStage(quality, detail);
         mountCurrent();
       },
       drop: () => {
         if (ended) return;
+        savePicture();
         state.dropFilm();
         mountCurrent();
       },
