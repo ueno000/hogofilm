@@ -2,7 +2,7 @@ import { h } from '../dom';
 import { filmGroup } from './film';
 import { createStageView } from './shell';
 import type { Stage } from './stage';
-import { alignQuality, createAlign, holdDistance, moveFilm, type AlignState, type Direction } from './logic/align';
+import { alignQuality, createAlign, holdDistance, moveFilm, shakeOffset, type AlignState, type Direction } from './logic/align';
 
 const KEY_DIR: Record<string, Direction> = {
   ArrowUp: 'up',
@@ -35,18 +35,21 @@ export const alignStage: Stage = {
     view.layer.append(film);
 
     // ずれの表示や「ぴったり」の演出は出さない。合っているかは結果画面で分かる（A-4）
+    // 描く位置にだけ手ブレを足す。state（本当の位置）は揺らさない（A-3）
     const render = () => {
-      film.setAttribute('transform', `translate(${state.x} ${state.y})`);
+      const shake = shakeOffset(performance.now());
+      film.setAttribute('transform', `translate(${state.x + shake.x} ${state.y + shake.y})`);
     };
 
     const step = () => {
       if (!hold) return;
       state = moveFilm(hold.origin, hold.dir, holdDistance(performance.now() - hold.startedAt));
-      render();
     };
+    // 手ブレのため、工程中はずっと毎フレーム描き直す
     const loop = () => {
       step();
-      raf = hold ? requestAnimationFrame(loop) : 0;
+      render();
+      raf = done ? 0 : requestAnimationFrame(loop);
     };
 
     // 短く押すとタップ1回分、長押しすると待ってから動き出して加速する（A-1）
@@ -55,14 +58,13 @@ export const alignStage: Stage = {
       release();
       hold = { dir, origin: state, startedAt: performance.now(), source };
       step();
-      raf = requestAnimationFrame(loop);
+      render();
     };
     const release = (source?: string) => {
       if (!hold || (source !== undefined && hold.source !== source)) return;
       step();
       hold = undefined;
-      cancelAnimationFrame(raf);
-      raf = 0;
+      render();
     };
 
     const confirm = () => {
@@ -123,6 +125,7 @@ export const alignStage: Stage = {
     window.addEventListener('keyup', onKeyUp);
     window.addEventListener('blur', onBlur);
     render();
+    raf = requestAnimationFrame(loop);
 
     return () => {
       done = true;
