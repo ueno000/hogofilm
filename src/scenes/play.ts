@@ -2,6 +2,7 @@ import { h } from '../dom';
 import { GameState, TIME_LIMIT_MS } from '../game/state';
 import { CountdownTimer } from '../game/timer';
 import { formatSeconds } from '../game/share';
+import { phaseNotice, secondMark, timePhase, TIME_NOTICE_MS, type TimePhase } from '../game/timePhase';
 import { STAGE_ORDER, type EndReason } from '../game/types';
 import { getStage } from '../stages';
 import { mountSkippedStage } from '../stages/skipped';
@@ -13,27 +14,61 @@ export const playScene: Scene = (root, nav) => {
   const stageName = h('span', { class: 'hud__name' });
   const timeLabel = h('span', { class: 'hud__time' });
   const timeBar = h('div', { class: 'hud__bar-fill' });
-  const stageArea = h('section', { class: 'stage-area' });
-
-  root.append(
-    h('main', { class: 'screen screen--play' },
-      h('header', { class: 'hud' },
-        h('div', { class: 'hud__row' }, stepLabel, stageName, timeLabel),
-        h('div', { class: 'hud__bar' }, timeBar),
-      ),
-      stageArea,
-    ),
+  const bar = h('div', { class: 'hud__bar' }, timeBar);
+  const notice = h('p', { class: 'hud__notice', 'aria-live': 'polite' });
+  const hud = h('header', { class: 'hud', 'data-phase': 'normal' },
+    h('div', { class: 'hud__row' }, stepLabel, stageName, timeLabel),
+    bar,
+    notice,
   );
+  const stageArea = h('section', { class: 'stage-area' });
+  const screen = h('main', { class: 'screen screen--play' }, hud, stageArea);
+  root.append(screen);
 
   let unmountStage: (() => void) | void;
   let ended = false;
+
+  // 時間演出（U-1〜U-4）。段階は残り時間の割合と秒数で決まる
+  let phase: TimePhase = 'normal';
+  let lastSecond = Infinity;
+  let noticeTimer = 0;
+  /** CSS アニメーションを最初からかけ直す */
+  const replay = (el: Element, cls: string) => {
+    el.classList.remove(cls);
+    void (el as HTMLElement).offsetWidth;
+    el.classList.add(cls);
+  };
+  const showNotice = (text: string) => {
+    notice.textContent = text;
+    replay(notice, 'is-shown');
+    clearTimeout(noticeTimer);
+    noticeTimer = window.setTimeout(() => notice.classList.remove('is-shown'), TIME_NOTICE_MS);
+  };
 
   const timer = new CountdownTimer(
     TIME_LIMIT_MS,
     (left) => {
       timeLabel.textContent = `${formatSeconds(left)}秒`;
       timeBar.style.transform = `scaleX(${left / TIME_LIMIT_MS})`;
-      timeLabel.classList.toggle('is-danger', left < 15_000);
+
+      const next = timePhase(left, TIME_LIMIT_MS);
+      const text = phaseNotice(phase, next);
+      if (next !== phase) {
+        phase = next;
+        hud.dataset.phase = next;
+        timeLabel.classList.toggle('is-danger', next === 'danger');
+        screen.classList.toggle('is-danger', next === 'danger');
+        // 半分を過ぎた瞬間に、ゲージが一度ぴょんと跳ねる
+        if (next === 'warn') replay(bar, 'is-hop');
+      }
+      if (text) showNotice(text);
+      // 残りわずかの間は、表示の秒数が変わるたびにゲージと秒数が脈打つ
+      const second = secondMark(left);
+      if (phase === 'danger' && second !== lastSecond) {
+        replay(bar, 'is-pulse');
+        replay(timeLabel, 'is-pulse');
+      }
+      lastSecond = second;
     },
     () => end('timeout'),
   );
@@ -42,6 +77,7 @@ export const playScene: Scene = (root, nav) => {
     if (ended) return;
     ended = true;
     const remaining = timer.stop();
+    clearTimeout(noticeTimer);
     unmountStage?.();
     nav.toResult(state.finish(reason, remaining));
   }
@@ -85,6 +121,7 @@ export const playScene: Scene = (root, nav) => {
   return () => {
     ended = true;
     timer.stop();
+    clearTimeout(noticeTimer);
     unmountStage?.();
   };
 };

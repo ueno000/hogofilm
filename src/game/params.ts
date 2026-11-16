@@ -7,6 +7,9 @@ import csvText from '../params.csv?raw';
 /** コードが使う調整値の名前。CSV にすべてそろっていないと起動しない */
 export const PARAM_NAMES = [
   'TIME_LIMIT_MS',
+  'TIME_WARN_RATIO',
+  'TIME_DANGER_MS',
+  'TIME_NOTICE_MS',
   'DROP_AUTO_STAGE_MS',
   'WIPE_COLS',
   'WIPE_ROWS',
