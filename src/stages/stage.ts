@@ -1,6 +1,11 @@
-import type { StageDetail, StageId } from '../game/types';
+import type { FinishPicture, StageDetail, StageId } from '../game/types';
 
 export interface StageContext {
+  /**
+   * 結果画面の絵に使う、この工程の今の状態を返す関数を登録する（R-1〜R-5）。
+   * 工程を終えたとき・フィルムを落としたとき・時間切れの瞬間に呼ばれる。
+   */
+  picture(get: () => FinishPicture): void;
   /** 工程完了。quality は 0〜1。detail は評価に使う追加情報（拭く工程の削れた割合など） */
   complete(quality: number, detail?: StageDetail): void;
   /** フィルムを床に落とした。ゲームは続き、残りの工程は操作なしで進む。仮固定工程で使う。 */
