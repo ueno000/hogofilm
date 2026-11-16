@@ -6,7 +6,12 @@ import {
   DUST_SPAWN_MIN,
   DUST_SPAWN_RAMP_MS,
   DUST_SPAWN_START,
+  DUST_LEVEL_ARI,
+  DUST_LEVEL_DARAKE,
+  DUST_LEVEL_LABEL,
+  DUST_LEVEL_MAMIRE,
   DUST_STICKER_RADIUS,
+  dustLevel,
   dustQuality,
   remainingDust,
   spawnDust,
@@ -91,5 +96,30 @@ describe('品質', () => {
   it('残りが多くても0未満にならない', () => {
     const ds = Array.from({ length: 30 }, (_, i) => dust(i, 0, 0));
     expect(dustQuality(ds)).toBe(0);
+  });
+});
+
+describe('残りの埃の段階（D-7）', () => {
+  it('境目どおりに5段階に分ける（20以上・11〜19・6〜10・1〜5・0）', () => {
+    expect(dustLevel(25, 20, 11, 6)).toBe('mamire');
+    expect(dustLevel(20, 20, 11, 6)).toBe('mamire');
+    expect(dustLevel(19, 20, 11, 6)).toBe('darake');
+    expect(dustLevel(11, 20, 11, 6)).toBe('darake');
+    expect(dustLevel(10, 20, 11, 6)).toBe('ari');
+    expect(dustLevel(6, 20, 11, 6)).toBe('ari');
+    expect(dustLevel(5, 20, 11, 6)).toBe('kirei');
+    expect(dustLevel(1, 20, 11, 6)).toBe('kirei');
+    expect(dustLevel(0, 20, 11, 6)).toBe('kanpeki');
+  });
+
+  it('境目は調整値を使う', () => {
+    expect(dustLevel(DUST_LEVEL_MAMIRE)).toBe('mamire');
+    expect(dustLevel(DUST_LEVEL_MAMIRE - 1)).toBe('darake');
+    expect(dustLevel(DUST_LEVEL_DARAKE - 1)).toBe('ari');
+    expect(dustLevel(DUST_LEVEL_ARI - 1)).toBe('kirei');
+  });
+
+  it('段階の文字', () => {
+    expect(Object.values(DUST_LEVEL_LABEL)).toEqual(['埃まみれ', '埃だらけ', '埃あり', '綺麗', '完璧']);
   });
 });

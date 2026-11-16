@@ -4,7 +4,9 @@ import { svgEl, toSvgPoint, trackPointer } from './svg';
 import type { Stage } from './stage';
 import {
   createDust,
+  DUST_LEVEL_LABEL,
   DUST_STICKER_RADIUS,
+  dustLevel,
   dustQuality,
   remainingDust,
   spawnDust,
@@ -56,10 +58,16 @@ export const dustStage: Stage = {
     };
     dusts.forEach((d) => draw(d, false));
 
+    // 残りの埃は数字で出さず、段階の文字で見せる（D-7）。段階が変わったときだけ書き換える
+    view.status.classList.add('dust-level');
+    let shownLevel = '';
     const update = () => {
-      const left = remainingDust(dusts);
-      view.status.textContent = left === 0 ? '今だ！' : `のこり ${left}個`;
-      view.status.classList.toggle('is-now', left === 0);
+      const level = dustLevel(remainingDust(dusts));
+      if (level === shownLevel) return;
+      if (shownLevel) view.status.classList.remove(`is-${shownLevel}`);
+      shownLevel = level;
+      view.status.classList.add(`is-${level}`);
+      view.status.textContent = DUST_LEVEL_LABEL[level];
     };
 
     // 埃は1個ずつ降り続け、間隔はだんだん短くなる（D-1, D-2）。
