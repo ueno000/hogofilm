@@ -178,6 +178,7 @@ describe('share', () => {
     reason: 'completed',
     results: [],
     remainingMs: 20_000,
+    picture: {},
     scores: { speed: 67, screen: 90, film: 85 },
     tiers: { speed: 'mid', screen: 'high', film: 'high' },
     incidents: { dropped: false, overPolished: false },

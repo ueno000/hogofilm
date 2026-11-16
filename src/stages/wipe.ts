@@ -18,18 +18,18 @@ import {
 } from './logic/wipe';
 
 /** 汚れ1段あたりの不透明度 */
-const DIRT_OPACITY_PER_LEVEL = 0.2;
+export const DIRT_OPACITY_PER_LEVEL = 0.2;
 /** 汚れのぼかし（SVG 座標単位） */
-const DIRT_BLUR = 5;
+export const DIRT_BLUR = 5;
 /** マスの大きさに対する汚れの楕円の半径。隣と重ねて境目をなくす */
-const DIRT_SPREAD = 0.8;
+export const DIRT_SPREAD = 0.8;
 /** 基板の模様1枚の大きさ（SVG 座標単位） */
 const CIRCUIT_TILE = 24;
 
-/** 削れた場所に見せる基板の模様（緑の地に回路の線）。 */
-function circuitPattern(): SVGPatternElement {
+/** 削れた場所に見せる基板の模様（緑の地に回路の線）。結果画面の絵でも使う */
+export function circuitPattern(id = 'wipe-circuit'): SVGPatternElement {
   const t = CIRCUIT_TILE;
-  const p = svgEl('pattern', { id: 'wipe-circuit', patternUnits: 'userSpaceOnUse', width: t, height: t });
+  const p = svgEl('pattern', { id, patternUnits: 'userSpaceOnUse', width: t, height: t });
   p.append(
     svgEl('rect', { width: t, height: t, class: 'board__base' }),
     svgEl('path', {
@@ -50,6 +50,14 @@ export const wipeStage: Stage = {
   mount(container, ctx) {
     const view = createStageView(container, 'wipe', this.hint);
     const state = createWipe(SCREEN, Math.random);
+    ctx.picture(() => ({
+      wipe: {
+        cols: state.cols,
+        rows: state.rows,
+        dirt: [...state.dirt],
+        scratched: state.dirt.map((_, i) => isScratched(state, i)),
+      },
+    }));
     let done = false;
 
     // 汚れレイヤー：マスごとの四角をぼかして、画面の形で切り抜く

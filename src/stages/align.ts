@@ -28,6 +28,7 @@ export const alignStage: Stage = {
   mount(container, ctx) {
     const view = createStageView(container, 'align', this.hint);
     let state = createAlign(Math.random);
+    ctx.picture(() => ({ film: { x: state.x, y: state.y } }));
     let hold: Hold | undefined;
     let raf = 0;
     let done = false;

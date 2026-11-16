@@ -389,6 +389,25 @@ h1, h2, p { margin: 0; }
 .axis.is-mid .axis__tier { background: var(--yellow); color: #2b2140; }
 .incidents { font-weight: 900; color: var(--danger); }
 
+/* 結果画面の仕上がりの絵（R-1〜R-5）。絵を大きく出し、点数・称号・ボタンまで1画面に収める */
+.screen--result { gap: 10px; }
+/* 絵は残りの高さいっぱいに広げる（点数・称号・ボタンを押し出さない範囲で） */
+.result-picture { width: 100%; display: flex; justify-content: center; flex: 1 1 0; min-height: 180px; }
+.result-picture__svg { display: block; height: 100%; max-height: 52dvh; width: auto; max-width: 100%; }
+.result-bubble__body { fill: rgba(255, 255, 255, 0.3); stroke: rgba(43, 33, 64, 0.45); stroke-width: 1.2; }
+.result-floor__shadow { fill: rgba(0, 0, 0, 0.25); }
+.result-film.is-floor .film__sheet { fill: rgba(214, 196, 168, 0.75); }
+.result-floor__dust { stroke-width: 0.6; }
+/* 点数の軸は3つ横に並べて高さを詰める */
+.screen--result .axes { grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 6px; }
+.screen--result .axis { flex-direction: column; justify-content: flex-start; gap: 2px; padding: 6px 4px; }
+.screen--result .axis__label { text-align: center; font-size: 14px; justify-items: center; }
+.screen--result .axis__note { font-size: 11px; }
+.screen--result .axis__score { font-size: 26px; }
+.screen--result .axis__tier { margin-left: 2px; padding: 0 6px; }
+.screen--result .rank { padding: 10px 14px; gap: 4px; }
+.screen--result .rank__title { font-size: 24px; }
+
 /* 調整値エラー */
 .screen--error { justify-content: center; }
 .param-errors {

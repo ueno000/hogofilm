@@ -11,6 +11,7 @@ export const dustStage: Stage = {
   mount(container, ctx) {
     const view = createStageView(container, 'dust', this.hint);
     const dusts = createDust(SCREEN, Math.random);
+    ctx.picture(() => ({ dust: dusts.filter((d) => !d.removed).map(({ x, y, r }) => ({ x, y, r })) }));
     const delays = createDelays();
     const startedAt = performance.now();
     let done = false;

@@ -21,6 +21,7 @@ export const bubblesStage: Stage = {
   mount(container, ctx) {
     const view = createStageView(container, 'bubbles', this.hint);
     const bubbles = createBubbles(SCREEN, Math.random);
+    ctx.picture(() => ({ bubbles: bubbles.filter((b) => !b.out).map(({ x, y, r }) => ({ x, y, r })) }));
     const delays = createDelays();
     let done = false;
 
