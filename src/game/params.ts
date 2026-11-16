@@ -54,6 +54,7 @@ export const PARAM_NAMES = [
   'SPEED_FULL_REMAIN_MS',
   'RANK_HIGH_MIN',
   'RANK_MID_MIN',
+  'SHARE_COPIED_MS',
 ] as const;
 
 export type ParamName = (typeof PARAM_NAMES)[number];
