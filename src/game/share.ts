@@ -1,5 +1,9 @@
 import { getTitle } from './ranks';
 import type { GameOutcome, Incidents, ScoreAxis, Tier } from './types';
+import { param } from './params';
+
+/** 「コピーしました」を出しておく時間（ms）（R-7） */
+export const SHARE_COPIED_MS = param('SHARE_COPIED_MS');
 
 export const AXIS_ORDER: readonly ScoreAxis[] = ['speed', 'screen', 'film'];
 
@@ -53,4 +57,17 @@ export function buildShareText(outcome: GameOutcome, url?: string): string {
 
 export function buildXIntentUrl(text: string): string {
   return `https://x.com/intent/post?text=${encodeURIComponent(text)}`;
+}
+
+/**
+ * シェア文に付けるゲームのURL。http(s) で開いているときだけ、ページの URL（# より前）を返す。
+ * ローカルのファイルなど、他の人が開けない URL は付けない。
+ */
+export function gameUrl(href: string, protocol: string): string | undefined {
+  return protocol.startsWith('http') ? href.split('#')[0] : undefined;
+}
+
+/** 「コピー」ボタンでコピーする文。X に投稿する文と同じシェア文に、ゲームのURLを付ける（R-7） */
+export function buildCopyText(outcome: GameOutcome, url?: string): string {
+  return buildShareText(outcome, url);
 }
