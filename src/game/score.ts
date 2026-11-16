@@ -11,7 +11,7 @@ export const FILM_WEIGHTS: Partial<Record<StageId, number>> = { align: 35, tack:
 export const RANK_HIGH_MIN = param('RANK_HIGH_MIN');
 /** 段階「中」の下限（点） */
 export const RANK_MID_MIN = param('RANK_MID_MIN');
-/** 削れた割合がこれを超えると事件「研磨しすぎ」 */
+/** 削れた割合がこれを超えるとやらかし「研磨しすぎ」 */
 export const WIPE_EXPOSE_LIMIT = param('WIPE_EXPOSE_LIMIT');
 
 function clamp01(v: number): number {
@@ -63,7 +63,7 @@ export interface Evaluation {
   incidents: Incidents;
 }
 
-/** 工程結果から、点数の軸3つ・段階・事件の軸2つを求める。 */
+/** 工程結果から、点数の軸3つ・段階・やらかしの軸2つを求める。 */
 export function evaluate(
   results: readonly StageResult[],
   reason: EndReason,
