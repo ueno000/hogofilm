@@ -32,6 +32,33 @@ export interface Incidents {
   overPolished: boolean;
 }
 
+/** 位置（SVG 座標、200×400 のスマホの座標系） */
+export interface Spot {
+  x: number;
+  y: number;
+}
+
+/** 位置と半径（残った埃・気泡） */
+export interface RoundSpot extends Spot {
+  r: number;
+}
+
+/**
+ * 結果画面の絵に使う、各工程の終わりの状態（R-1〜R-5）。
+ * 工程を終えたとき・フィルムを落としたとき・時間切れの瞬間に、その工程の状態を残す。
+ * まだ入っていない工程の項目は undefined。
+ */
+export interface FinishPicture {
+  /** 拭く工程: マスごとの汚れの残り段数と、削れて基板が見えているか */
+  wipe?: { cols: number; rows: number; dirt: number[]; scratched: boolean[] };
+  /** 埃取り工程: 残った埃 */
+  dust?: RoundSpot[];
+  /** 位置合わせ工程: フィルムのずれ。undefined ならフィルムは貼る前（画面の横に置いたまま） */
+  film?: Spot;
+  /** 気泡抜き工程: 残った気泡（フィルムの上の座標） */
+  bubbles?: RoundSpot[];
+}
+
 export interface GameOutcome {
   reason: EndReason;
   results: StageResult[];
@@ -39,4 +66,6 @@ export interface GameOutcome {
   scores: Scores;
   tiers: Record<ScoreAxis, Tier>;
   incidents: Incidents;
+  /** 結果画面の絵に使う終わりの状態 */
+  picture: FinishPicture;
 }

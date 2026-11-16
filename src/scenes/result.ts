@@ -11,6 +11,7 @@ import {
   TIER_LABEL,
 } from '../game/share';
 import type { GameOutcome, ScoreAxis } from '../game/types';
+import { resultPicture } from './resultPicture';
 import type { Scene } from './scene';
 
 export const resultScene = (outcome: GameOutcome): Scene => (root, nav) => {
@@ -28,6 +29,8 @@ export const resultScene = (outcome: GameOutcome): Scene => (root, nav) => {
   root.append(
     h('main', { class: `screen screen--result is-${outcome.reason}${dropped ? ' is-dropped' : ''}` },
       h('p', { class: 'eyebrow' }, resultHeading(outcome)),
+      // 仕上がったスマホの絵を最初に大きく出す（R-1〜R-5）
+      h('div', { class: 'result-picture' }, resultPicture(outcome)),
       h('dl', { class: 'axes' },
         ...AXIS_ORDER.map((axis) =>
           h('div', { class: `axis is-${outcome.tiers[axis]}` },
@@ -47,8 +50,10 @@ export const resultScene = (outcome: GameOutcome): Scene => (root, nav) => {
       ),
       h('div', { class: 'actions' },
         h('button', { class: 'btn btn--x', onclick: share }, 'Xでシェア'),
-        h('button', { class: 'btn btn--primary', onclick: () => nav.toPlay() }, 'もう一度'),
-        h('button', { class: 'btn', onclick: () => nav.toTitle() }, 'タイトルへ'),
+        h('div', { class: 'actions actions--row' },
+          h('button', { class: 'btn btn--primary', onclick: () => nav.toPlay() }, 'もう一度'),
+          h('button', { class: 'btn', onclick: () => nav.toTitle() }, 'タイトルへ'),
+        ),
       ),
     ),
   );
