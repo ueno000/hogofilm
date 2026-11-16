@@ -86,3 +86,35 @@ export function remainingDust(dusts: readonly Dust[]): number {
 export function dustQuality(dusts: readonly Dust[]): number {
   return Math.max(0, 1 - remainingDust(dusts) * DUST_PENALTY);
 }
+
+/** この数以上で「埃まみれ」（D-7） */
+export const DUST_LEVEL_MAMIRE = param('DUST_LEVEL_MAMIRE');
+/** この数以上で「埃だらけ」 */
+export const DUST_LEVEL_DARAKE = param('DUST_LEVEL_DARAKE');
+/** この数以上で「埃あり」。1以上で「綺麗」、0で「完璧」 */
+export const DUST_LEVEL_ARI = param('DUST_LEVEL_ARI');
+
+/** 残りの埃の段階（D-7）。数字は出さず、段階の文字で見せる */
+export type DustLevel = 'mamire' | 'darake' | 'ari' | 'kirei' | 'kanpeki';
+
+export const DUST_LEVEL_LABEL: Record<DustLevel, string> = {
+  mamire: '埃まみれ',
+  darake: '埃だらけ',
+  ari: '埃あり',
+  kirei: '綺麗',
+  kanpeki: '完璧',
+};
+
+/** 残っている埃の数から段階を決める。降っている途中の扱い（D-3）は提案のままなので、残りはすべて数える */
+export function dustLevel(
+  remaining: number,
+  mamire = DUST_LEVEL_MAMIRE,
+  darake = DUST_LEVEL_DARAKE,
+  ari = DUST_LEVEL_ARI,
+): DustLevel {
+  if (remaining >= mamire) return 'mamire';
+  if (remaining >= darake) return 'darake';
+  if (remaining >= ari) return 'ari';
+  if (remaining >= 1) return 'kirei';
+  return 'kanpeki';
+}
