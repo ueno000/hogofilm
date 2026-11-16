@@ -7,7 +7,7 @@ const TIERS: Tier[] = ['high', 'mid', 'low'];
 const NONE: Incidents = { dropped: false, overPolished: false };
 const tiers = (speed: Tier, screen: Tier, film: Tier): Record<ScoreAxis, Tier> => ({ speed, screen, film });
 
-/** 段階と事件の組み合わせを全部並べる */
+/** 段階とやらかしの組み合わせを全部並べる */
 function allCombos() {
   const combos: Array<{ t: Record<ScoreAxis, Tier>; inc: Incidents }> = [];
   for (const speed of TIERS) for (const screen of TIERS) for (const film of TIERS) {
@@ -34,7 +34,7 @@ describe('称号表', () => {
 });
 
 describe('判定の優先順位', () => {
-  it('事件が2つともなら、段階に関係なく「素の画面派」', () => {
+  it('やらかしが2つともなら、段階に関係なく「素の画面派」', () => {
     for (const s of TIERS) {
       expect(getTitle(tiers(s, s, s), { dropped: true, overPolished: true }).title).toBe('素の画面派');
     }
@@ -56,17 +56,31 @@ describe('判定の優先順位', () => {
     expect(getTitle(tiers('high', 'high', 'low'), inc).title).toBe('削り師');
   });
 
-  it('事件なしなら、手早さ・画面の綺麗さ・フィルムの貼り方の順に段階を並べる', () => {
+  it('やらかしなしなら、手早さ・画面の綺麗さ・フィルムの貼り方の順に段階を並べる', () => {
     expect(titleKey(tiers('high', 'mid', 'low'), NONE)).toBe('高中低');
     expect(getTitle(tiers('high', 'high', 'high'), NONE).title).toBe('保護フィルム仙人');
     expect(getTitle(tiers('high', 'mid', 'low'), NONE).title).toBe('せっかち職人');
     expect(getTitle(tiers('low', 'high', 'high'), NONE).title).toBe('時間を忘れた匠');
     expect(getTitle(tiers('low', 'low', 'low'), NONE).title).toBe('全部これから');
   });
+
+  it('高低低 は「嵐の貼り手」（R-6 で差し替え）', () => {
+    expect(getTitle(tiers('high', 'low', 'low'), NONE)).toMatchObject({
+      title: '嵐の貼り手',
+      comment: 'あっという間に通りすぎ、埃と気泡だけが残りました。',
+    });
+  });
+
+  it('称号とひとことに「事件」の言葉が残っていない', () => {
+    for (const t of Object.values(TITLES)) {
+      expect(t.title).not.toContain('事件');
+      expect(t.comment).not.toContain('事件');
+    }
+  });
 });
 
 describe('点数からの判定', () => {
-  it('シートの判定チェック例（72・90・55点、事件なし）は「まじめな貼り手」', () => {
+  it('シートの判定チェック例（72・90・55点、やらかしなし）は「まじめな貼り手」', () => {
     const { tiers: t } = evaluate(
       [
         { stage: 'wipe', quality: 0.9 },

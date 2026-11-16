@@ -16,7 +16,7 @@ export const INCIDENT_LABEL: Record<keyof Incidents, string> = {
   overPolished: '研磨しすぎ',
 };
 
-/** ついた事件の名前（なければ空） */
+/** ついたやらかしの名前（なければ空） */
 export function incidentNames(incidents: Incidents): string[] {
   return (Object.keys(INCIDENT_LABEL) as (keyof Incidents)[])
     .filter((k) => incidents[k])
@@ -29,7 +29,7 @@ export function formatSeconds(ms: number): string {
 
 /**
  * 結果画面の見出し。時間切れを優先し、次にフィルムを落としたまま最後まで進んだ場合。
- * 落下は事件の行でも別に伝える。
+ * 落下はやらかしの行でも別に伝える。
  */
 export function resultHeading(outcome: Pick<GameOutcome, 'reason' | 'incidents'>): string {
   if (outcome.reason === 'timeout') return '時間切れ！';
@@ -43,7 +43,7 @@ export function buildShareText(outcome: GameOutcome, url?: string): string {
   const lines = [
     '保護フィルム貼りの結果！',
     AXIS_ORDER.map((a) => `${AXIS_LABEL[a]} ${outcome.scores[a]}点`).join('／'),
-    incidents.length ? `事件：${incidents.join('・')}` : null,
+    incidents.length ? `やらかし：${incidents.join('・')}` : null,
     `称号「${rank.title}」`,
     '#フィルム貼り職人',
   ].filter((l): l is string => l !== null);

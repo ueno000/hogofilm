@@ -43,7 +43,7 @@ export const resultScene = (outcome: GameOutcome): Scene => (root, nav) => {
           ),
         ),
       ),
-      incidents.length ? h('p', { class: 'incidents' }, `事件：${incidents.join('・')}`) : null,
+      incidents.length ? h('p', { class: 'incidents' }, `やらかし：${incidents.join('・')}`) : null,
       h('div', { class: 'rank' },
         h('h2', { class: 'rank__title' }, rank.title),
         h('p', { class: 'rank__comment' }, rank.comment),
