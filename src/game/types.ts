@@ -6,6 +6,8 @@ export const STAGE_ORDER: readonly StageId[] = ['wipe', 'dust', 'align', 'tack',
 export interface StageDetail {
   /** 拭く工程で、削れて基板が見えている割合（やらかし「研磨しすぎ」の判定に使う） */
   scratchedRatio?: number;
+  /** 仮固定の工程で、4隅の判定から決まったフィルムの角度（度）。やらかし「斜め貼り」の判定に使う */
+  tiltDeg?: number;
 }
 
 /** 各工程の仕上がり。quality は 0（最悪）〜 1（完璧）。 */
@@ -30,6 +32,8 @@ export interface Incidents {
   dropped: boolean;
   /** 拭く工程で画面を削りすぎた */
   overPolished: boolean;
+  /** 仮固定でフィルムが大きく傾いた（落下したときはつかない） */
+  tilted: boolean;
 }
 
 /** 位置（SVG 座標、200×400 のスマホの座標系） */
@@ -55,6 +59,8 @@ export interface FinishPicture {
   dust?: RoundSpot[];
   /** 位置合わせ工程: フィルムのずれ。undefined ならフィルムは貼る前（画面の横に置いたまま） */
   film?: Spot;
+  /** 仮固定工程: フィルムの角度（度）。右回りがプラス */
+  tilt?: number;
   /** 気泡抜き工程: 残った気泡（フィルムの上の座標） */
   bubbles?: RoundSpot[];
 }

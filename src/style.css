@@ -325,6 +325,13 @@ h1, h2, p { margin: 0; }
 /* フィルム */
 .film__sheet { fill: rgba(255, 255, 255, 0.35); stroke: rgba(255, 255, 255, 0.95); stroke-width: 1.2; }
 .film { transition: transform 0.12s ease-out; }
+/* 仮固定の判定でフィルムが傾く（T-2）。画面の中心を軸に、少しなめらかに回す */
+.playfield[data-stage='tack'] .film,
+.playfield[data-stage='bubbles'] .film {
+  transform-box: view-box;
+  transform-origin: 50% 50%;
+  transition: transform 0.35s ease-out;
+}
 .film.is-falling, .corner.is-falling {
   animation: film-fall 0.9s ease-in forwards;
   transform-box: view-box;
