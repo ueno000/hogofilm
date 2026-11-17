@@ -70,6 +70,7 @@ describe('src/params.csv', () => {
 
   it('param() で値を引ける', () => {
     expect(param('TIME_LIMIT_MS')).toBe(90000);
-    expect(param('WIPE_SCRATCH_RUBS')).toBe(5);
+    // 調整値は企画が変えて試すので、CSV に書いた値と同じかだけを確かめる
+    expect(param('WIPE_SCRATCH_RUBS')).toBe(parseParamsCsv(csvText).values.get('WIPE_SCRATCH_RUBS'));
   });
 });

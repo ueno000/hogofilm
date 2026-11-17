@@ -133,7 +133,7 @@ export const dustStage: Stage = {
       if (done) return;
       done = true;
       delays.clear();
-      ctx.complete(dustQuality(dusts));
+      ctx.complete(dustQuality(dusts), { dustLeft: remainingDust(dusts) });
     }, true));
     update();
 

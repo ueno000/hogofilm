@@ -2,9 +2,9 @@ import { describe, expect, it } from 'vitest';
 import { checkTitles, COMMENT_KEYS, parseTitlesCsv, TITLE_ERRORS, WORD_KEYS } from '../../src/game/titles';
 
 describe('称号の CSV（R-9）', () => {
-  it('src/titles.csv は必要な単語19・ひとこと38がそろっていて、エラーがない', () => {
-    expect(WORD_KEYS).toHaveLength(19);
-    expect(COMMENT_KEYS).toHaveLength(38);
+  it('src/titles.csv は必要な単語20・ひとこと39（単独の称号 R-13 を含む）がそろっていて、エラーがない', () => {
+    expect(WORD_KEYS).toHaveLength(20);
+    expect(COMMENT_KEYS).toHaveLength(39);
     expect(TITLE_ERRORS).toEqual([]);
   });
 
