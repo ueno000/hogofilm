@@ -71,6 +71,8 @@ export interface GameOutcome {
   remainingMs: number;
   scores: Scores;
   tiers: Record<ScoreAxis, Tier>;
+  /** 気泡抜きの段階（称号の単語に使う。B-6） */
+  bubbleTier: Tier;
   incidents: Incidents;
   /** 結果画面の絵に使う終わりの状態 */
   picture: FinishPicture;

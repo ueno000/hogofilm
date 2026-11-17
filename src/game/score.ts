@@ -61,7 +61,18 @@ export function isOverPolished(results: readonly StageResult[]): boolean {
 export interface Evaluation {
   scores: Scores;
   tiers: Record<ScoreAxis, Tier>;
+  /** 気泡抜きの段階（B-6） */
+  bubbleTier: Tier;
   incidents: Incidents;
+}
+
+/**
+ * 気泡抜きの段階（B-6）: 気泡抜きの品質を100倍し、点数の軸と同じ境目で段階にする。
+ * 気泡抜きの前に時間切れになったときは品質 0（低）。落下したときは称号に使わない
+ */
+export function bubbleTier(results: readonly StageResult[]): Tier {
+  const bubbles = results.find((r) => r.stage === 'bubbles');
+  return scoreTier(toPoints(100 * clamp01(bubbles?.quality ?? 0)));
 }
 
 /** 仮固定でフィルムが大きく傾いたら「斜め貼り」。落下したときはフィルムを貼らないのでつけない（T-4） */
@@ -86,6 +97,7 @@ export function evaluate(
   return {
     scores,
     tiers: { speed: scoreTier(scores.speed), screen: scoreTier(scores.screen), film: scoreTier(scores.film) },
+    bubbleTier: bubbleTier(results),
     incidents: { dropped, overPolished: isOverPolished(results), tilted: isTiltedFilm(results, dropped) },
   };
 }

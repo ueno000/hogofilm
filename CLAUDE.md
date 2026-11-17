@@ -31,6 +31,7 @@ npm run build   # tsc --noEmit による型チェック + vite build
 - `src/scenes/` — タイトル、遊び方、プレイ、結果の各画面
 - `src/game/` — 状態、タイマー、スコア、称号、シェア文、調整値の読み込み（DOM 非依存）
 - `src/params.csv` — 調整値。企画管理シートの「パラメータCSV」タブから出力したものを置く
+- `src/titles.csv` — 称号の言葉とひとこと。企画管理シートの「称号CSV」タブから出力したものを置く（`src/game/titles.ts` で読む）
 - `src/stages/` — 各工程の UI。`Stage` インターフェース（`stage.ts`）を実装し、`index.ts` に登録する
 - `src/stages/logic/` — 各工程の判定ロジック（DOM 非依存の純粋関数）
 - `tests/` — `src` と対応する配置で Vitest のテストを置く
@@ -45,6 +46,8 @@ npm run build   # tsc --noEmit による型チェック + vite build
   - CSV の列は `name,value,unit,stage,description`。企画管理シートの「パラメータCSV」タブから出力した形と同じにする。
   - 調整値を追加するときは、`src/params.csv` に行を足し、`params.ts` の `PARAM_NAMES` にも名前を足す。CSV に無い名前や数値でない値があると、ゲームは起動せずに画面へエラーを出す。
   - シートの「パラメータCSV」タブにまだ無い名前を足したときは、Issue コメントで企画にシートへの追加を頼む（シートは編集しない）。
+- 称号の言葉とひとことは `src/titles.csv`（列は `type,key,text,image`）に置き、`src/game/titles.ts` で読む。コードに直接書かない。
+  - 必要な key は `titles.ts` の `WORD_KEYS`（言葉）と `COMMENT_KEYS`（ひとことの判定キー）。足りない key や空のひとことがあると、ゲームは起動せずに画面へエラーを出す。
   - 描画用の固定値（`SCREEN` など）や配点・称号表は CSV に入れず、名前付き定数にして単位や意味をコメントで書く。
 - コメント・JSDoc は日本語で簡潔に。UI 文言も日本語。
 - 工程を追加するときは `Stage` インターフェースに従い、`game/types.ts` の `StageId` / `STAGE_ORDER` と `stages/index.ts` に登録する。
