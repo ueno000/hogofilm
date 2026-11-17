@@ -21,7 +21,7 @@ export const resultScene = (outcome: GameOutcome): Scene => (root, nav) => {
   // 手早さには、点数の根拠として残り時間を小さく添える
   const axisNote = (axis: ScoreAxis) =>
     axis === 'speed' ? h('span', { class: 'axis__note' }, `残り ${formatSeconds(outcome.remainingMs)}秒`) : null;
-  const rank = getTitle(outcome.tiers, outcome.incidents);
+  const rank = getTitle(outcome);
   const incidents = incidentNames(outcome.incidents);
   const url = gameUrl(location.href, location.protocol);
   const share = () => {
@@ -80,7 +80,8 @@ export const resultScene = (outcome: GameOutcome): Scene => (root, nav) => {
       ),
       incidents.length ? h('p', { class: 'incidents' }, `やらかし：${incidents.join('・')}`) : null,
       h('div', { class: 'rank' },
-        h('h2', { class: 'rank__title' }, rank.title),
+        // つなげた称号は長くなるので、長いときは文字を小さくする
+        h('h2', { class: `rank__title${rank.title.length > 16 ? ' is-long' : ''}` }, rank.title),
         h('p', { class: 'rank__comment' }, rank.comment),
       ),
       h('div', { class: 'actions' },

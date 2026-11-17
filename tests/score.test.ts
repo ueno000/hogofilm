@@ -98,6 +98,7 @@ describe('やらかし', () => {
     expect(evaluate(results, 'completed', 15_000, false)).toEqual({
       scores: { speed: 50, screen: 90, film: 100 },
       tiers: { speed: 'mid', screen: 'high', film: 'high' },
+      bubbleTier: 'high',
       incidents: { dropped: false, overPolished: true, tilted: false },
     });
   });
@@ -182,6 +183,7 @@ describe('share', () => {
     picture: {},
     scores: { speed: 67, screen: 90, film: 85 },
     tiers: { speed: 'mid', screen: 'high', film: 'high' },
+    bubbleTier: 'mid',
     incidents: { dropped: false, overPolished: false, tilted: false },
     ...over,
   });
@@ -257,9 +259,10 @@ describe('やらかし「斜め貼り」（T-4）', () => {
       picture: {},
       scores: { speed: 67, screen: 90, film: 30 },
       tiers: { speed: 'mid', screen: 'high', film: 'low' },
+      bubbleTier: 'low',
       incidents: { dropped: false, overPolished: true, tilted: true },
     };
     expect(buildShareText(outcome)).toContain('やらかし：研磨しすぎ・斜め貼り');
-    expect(buildShareText(outcome)).toContain('称号「傾いた基板」');
+    expect(buildShareText(outcome)).toContain('称号「斜め貼りの申し子！気泡と同居中の基板さえも磨くピカピカ貼り師」');
   });
 });
