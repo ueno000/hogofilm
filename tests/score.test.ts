@@ -14,6 +14,7 @@ import {
   WIPE_EXPOSE_LIMIT,
 } from '../src/game/score';
 import { GameState } from '../src/game/state';
+import { TACK_TILT_LIMIT } from '../src/stages/logic/tack';
 import { buildShareText, buildXIntentUrl, resultHeading } from '../src/game/share';
 import { STAGE_ORDER, type GameOutcome, type StageResult } from '../src/game/types';
 
@@ -97,7 +98,7 @@ describe('やらかし', () => {
     expect(evaluate(results, 'completed', 15_000, false)).toEqual({
       scores: { speed: 50, screen: 90, film: 100 },
       tiers: { speed: 'mid', screen: 'high', film: 'high' },
-      incidents: { dropped: false, overPolished: true },
+      incidents: { dropped: false, overPolished: true, tilted: false },
     });
   });
 });
@@ -181,7 +182,7 @@ describe('share', () => {
     picture: {},
     scores: { speed: 67, screen: 90, film: 85 },
     tiers: { speed: 'mid', screen: 'high', film: 'high' },
-    incidents: { dropped: false, overPolished: false },
+    incidents: { dropped: false, overPolished: false, tilted: false },
     ...over,
   });
 
@@ -196,7 +197,7 @@ describe('share', () => {
   });
 
   it('やらかしがついたときは投稿文に書く', () => {
-    const text = buildShareText(outcome({ incidents: { dropped: true, overPolished: true } }));
+    const text = buildShareText(outcome({ incidents: { dropped: true, overPolished: true, tilted: false } }));
     expect(text).toContain('やらかし：落下・研磨しすぎ');
   });
 
@@ -207,7 +208,7 @@ describe('share', () => {
 
 describe('結果画面の見出し', () => {
   const heading = (reason: 'completed' | 'timeout', dropped: boolean) =>
-    resultHeading({ reason, incidents: { dropped, overPolished: false } });
+    resultHeading({ reason, incidents: { dropped, overPolished: false, tilted: false } });
 
   it('最後まで進んだら「貼り付け完了！」', () => {
     expect(heading('completed', false)).toBe('貼り付け完了！');
@@ -220,5 +221,45 @@ describe('結果画面の見出し', () => {
   it('時間切れは落下より優先する', () => {
     expect(heading('timeout', false)).toBe('時間切れ！');
     expect(heading('timeout', true)).toBe('時間切れ！');
+  });
+});
+
+describe('やらかし「斜め貼り」（T-4）', () => {
+  const base = [
+    { stage: 'wipe' as const, quality: 1 },
+    { stage: 'dust' as const, quality: 1 },
+    { stage: 'align' as const, quality: 1 },
+  ];
+  it('仮固定の角度の大きさが規定以上なら斜め貼り', () => {
+    const results = [...base, { stage: 'tack' as const, quality: 0, tiltDeg: -TACK_TILT_LIMIT }];
+    expect(evaluate(results, 'completed', 30_000, false).incidents.tilted).toBe(true);
+  });
+
+  it('規定未満なら斜め貼りではない', () => {
+    const results = [...base, { stage: 'tack' as const, quality: 0.5, tiltDeg: TACK_TILT_LIMIT - 1 }];
+    expect(evaluate(results, 'completed', 30_000, false).incidents.tilted).toBe(false);
+  });
+
+  it('落下したときはフィルムを貼らないので、斜め貼りはつかない', () => {
+    const results = [...base, { stage: 'tack' as const, quality: 0, tiltDeg: 20 }];
+    expect(evaluate(results, 'completed', 30_000, true).incidents.tilted).toBe(false);
+  });
+
+  it('仮固定まで進まずに時間切れなら、斜め貼りはつかない', () => {
+    expect(evaluate(base, 'timeout', 0, false).incidents.tilted).toBe(false);
+  });
+
+  it('シェア文の「やらかし：」に斜め貼りを出す', () => {
+    const outcome: GameOutcome = {
+      reason: 'completed',
+      results: [],
+      remainingMs: 20_000,
+      picture: {},
+      scores: { speed: 67, screen: 90, film: 30 },
+      tiers: { speed: 'mid', screen: 'high', film: 'low' },
+      incidents: { dropped: false, overPolished: true, tilted: true },
+    };
+    expect(buildShareText(outcome)).toContain('やらかし：研磨しすぎ・斜め貼り');
+    expect(buildShareText(outcome)).toContain('称号「傾いた基板」');
   });
 });

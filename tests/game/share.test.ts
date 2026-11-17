@@ -9,7 +9,7 @@ const outcome: GameOutcome = {
   picture: {},
   scores: { speed: 67, screen: 90, film: 85 },
   tiers: { speed: 'mid', screen: 'high', film: 'high' },
-  incidents: { dropped: true, overPolished: false },
+  incidents: { dropped: true, overPolished: false, tilted: false },
 };
 
 describe('ゲームのURL', () => {
