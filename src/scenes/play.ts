@@ -114,6 +114,7 @@ export const playScene: Scene = (root, nav) => {
       picture: (get) => {
         currentPicture = get;
       },
+      earlier: () => state.pictureSoFar,
       complete: (quality, detail) => {
         if (ended) return;
         savePicture();

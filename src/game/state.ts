@@ -38,6 +38,11 @@ export class GameState {
     return this.filmDropped;
   }
 
+  /** それまでの工程が残した状態 */
+  get pictureSoFar(): FinishPicture {
+    return { ...this.picture };
+  }
+
   /** 工程の終わりの状態を、結果画面の絵のために残す（あとから来た項目で上書きする） */
   recordPicture(part: FinishPicture): void {
     this.picture = { ...this.picture, ...part };

@@ -72,7 +72,14 @@ function screenLayer(outcome: GameOutcome, defs: SVGDefsElement): SVGGElement {
 function filmOnPhone(outcome: GameOutcome): SVGGElement {
   const film = filmGroup();
   const off = outcome.picture.film ?? { x: 0, y: 0 };
-  film.setAttribute('transform', `translate(${off.x.toFixed(1)} ${off.y.toFixed(1)})`);
+  // 仮固定で傾いたフィルムは傾けて描く（T-2）。回す中心は画面の中心
+  const tilt = outcome.picture.tilt ?? 0;
+  const cx = SCREEN.x + SCREEN.w / 2;
+  const cy = SCREEN.y + SCREEN.h / 2;
+  film.setAttribute(
+    'transform',
+    `translate(${off.x.toFixed(1)} ${off.y.toFixed(1)}) rotate(${tilt.toFixed(2)} ${cx} ${cy})`,
+  );
   for (const b of outcome.picture.bubbles ?? []) {
     const g = svgEl('g', { class: 'result-bubble', transform: `translate(${b.x.toFixed(1)} ${b.y.toFixed(1)})` });
     g.append(

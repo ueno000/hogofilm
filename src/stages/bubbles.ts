@@ -27,7 +27,11 @@ export const bubblesStage: Stage = {
     const delays = createDelays();
     let done = false;
 
-    view.layer.append(filmGroup());
+    // 仮固定で傾いたフィルムは、傾いたまま気泡抜きに出す（T-2）
+    const film = filmGroup();
+    const tilt = ctx.earlier().tilt ?? 0;
+    if (tilt) film.style.transform = `rotate(${tilt}deg)`;
+    view.layer.append(film);
     // 画面の外に出た気泡が本体の上にはみ出さないよう、画面の形で切り抜く
     const clip = svgEl('clipPath', { id: 'bubble-clip' });
     clip.append(svgEl('rect', { x: SCREEN.x, y: SCREEN.y, width: SCREEN.w, height: SCREEN.h, rx: 20 }));
