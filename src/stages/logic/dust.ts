@@ -14,6 +14,8 @@ export const DUST_SPAWN_MIN = param('DUST_SPAWN_MIN');
 export const DUST_SPAWN_RAMP_MS = param('DUST_SPAWN_RAMP_MS');
 /** 「貼り始める」を押したときに残っている埃1個あたりの減点（D-5） */
 export const DUST_PENALTY = param('DUST_PENALTY');
+/** 「貼り始める」を押したときに残っている埃がこの数以上なら、単独の称号にする（R-13） */
+export const DUST_TITLE_MIN = param('DUST_TITLE_MIN');
 const EDGE_MARGIN = 14;
 const MIN_GAP = 26;
 /** 他の埃と離れた場所を探す回数。見つからなければ重なりを許して置く */

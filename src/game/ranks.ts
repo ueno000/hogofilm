@@ -10,11 +10,13 @@ export interface TitleInput {
   tiers: Record<ScoreAxis, Tier>;
   /** 気泡抜きの段階（B-6） */
   bubbleTier: Tier;
+  /** 埃が規定の数以上残った（R-13）。省略時はなし */
+  dustCoated?: boolean;
   incidents: Incidents;
 }
 
 export interface Title {
-  /** ひとことの判定キー（シートの称号タブと同じ表記）。例: `研磨+落下`, `落下|高`, `高中低` */
+  /** ひとことの判定キー（シートの称号タブと同じ表記）。例: `研磨+落下`, `落下|高`, `高中低`, `砂粒` */
   key: string;
   /** あてはまる要素の言葉をつなげた称号（R-8） */
   title: string;
@@ -37,14 +39,19 @@ export function titleKey(tiers: Record<ScoreAxis, Tier>, incidents: Incidents): 
   return `${TIER_KEY[tiers.speed]}${TIER_KEY[tiers.screen]}${TIER_KEY[tiers.film]}`;
 }
 
+/** 埃が規定の数以上残ったときのひとことの判定キー（R-13） */
+export const DUST_COAT_KEY = '砂粒';
+
 /**
  * あてはまる要素の言葉をつなげて称号を作る（R-8, B-6）。word は単語の key から単語を返す（空欄なら ''）。
  * - 並び: 手早さ → フィルムの貼り方（斜め貼りのときは「斜め貼り」）→ 気泡抜き → 研磨しすぎ → 画面の綺麗さ（最後の名詞）
  * - 落下したとき: 手早さ → 研磨しすぎ → 画面の綺麗さ（落下用）→ 「フィルムデストロイヤー」。貼り方・気泡抜きは付けない
  * - 手早さ・画面の綺麗さ・フィルムの貼り方・気泡抜きがすべて高で、やらかしがないときだけ例外の名前
+ * - 埃が規定の数以上残ったとき（R-13）は、落下・研磨しすぎ・斜め貼りがあっても他の言葉とつなげず単独の称号
  */
 export function buildTitle(input: TitleInput, word: (key: WordKey) => string): string {
   const { tiers, bubbleTier, incidents } = input;
+  if (input.dustCoated) return word('dustCoat');
   const noIncident = !incidents.dropped && !incidents.overPolished && !incidents.tilted;
   const allHigh = tiers.speed === 'high' && tiers.screen === 'high' && tiers.film === 'high' && bubbleTier === 'high';
   if (noIncident && allHigh) return word('perfect');
@@ -69,7 +76,7 @@ function csvWord(key: WordKey): string {
 
 /** 評価から称号とひとことを決める。称号は言葉をつなげて作り、ひとことは判定キーの表から引く */
 export function getTitle(input: TitleInput): Title {
-  const key = titleKey(input.tiers, input.incidents);
+  const key = input.dustCoated ? DUST_COAT_KEY : titleKey(input.tiers, input.incidents);
   return {
     key,
     title: buildTitle(input, csvWord),

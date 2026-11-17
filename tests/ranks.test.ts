@@ -1,6 +1,7 @@
 import { describe, expect, it } from 'vitest';
 import { buildTitle, getTitle, titleKey, type TitleInput } from '../src/game/ranks';
-import { evaluate } from '../src/game/score';
+import { DUST_TITLE_MIN } from '../src/stages/logic/dust';
+import { evaluate, isDustCoated } from '../src/game/score';
 import { COMMENT_KEYS, TITLE_WORDS, type WordKey } from '../src/game/titles';
 import type { Incidents, ScoreAxis, Tier } from '../src/game/types';
 
@@ -101,7 +102,7 @@ describe('気泡抜きの段階（B-6）', () => {
 });
 
 describe('ひとことの判定キー', () => {
-  it('どの組み合わせでも判定キーが38種類のどれかになり、38種類すべてに到達できる', () => {
+  it('埃が規定の数未満なら、どの組み合わせでも判定キーが称号タブの38種類のどれかになり、38種類すべてに到達できる', () => {
     const reached = new Set<string>();
     for (const { t, inc } of allCombos()) {
       const key = titleKey(t, inc);
@@ -146,5 +147,50 @@ describe('ひとことの判定キー', () => {
       title: '平凡なピカピカ貼り師',
       comment: '丁寧さが少しずつ仕上がりに出ています。',
     });
+  });
+});
+
+describe('埃が残ったときの単独の称号（R-13）', () => {
+  const COAT = 'フィルム代わりの砂粒コーティング、自然由来のフィルム貼り師';
+  const results = (dustLeft?: number) => [
+    { stage: 'wipe' as const, quality: 1 },
+    { stage: 'dust' as const, quality: 0, dustLeft },
+    { stage: 'align' as const, quality: 1 },
+    { stage: 'tack' as const, quality: 1, tiltDeg: 0 },
+    { stage: 'bubbles' as const, quality: 1 },
+  ];
+
+  it('境目は50個（調整値 DUST_TITLE_MIN）', () => {
+    expect(DUST_TITLE_MIN).toBe(50);
+  });
+
+  it('「貼り始める」を押したときに49個ならつなげた称号、50個なら単独の称号', () => {
+    const e49 = evaluate(results(49), 'completed', 30_000, false);
+    expect(e49.dustCoated).toBe(false);
+    expect(getTitle(e49).title).not.toBe(COAT);
+
+    const e50 = evaluate(results(50), 'completed', 30_000, false);
+    expect(e50.dustCoated).toBe(true);
+    expect(getTitle(e50)).toEqual({ key: '砂粒', title: COAT, comment: '砂粒で画面を守ることにしました' });
+  });
+
+  it('落下・研磨しすぎ・斜め貼りが重なっても単独の称号になる', () => {
+    const combos: Array<Partial<Incidents>> = [
+      { dropped: true },
+      { overPolished: true },
+      { tilted: true },
+      { dropped: true, overPolished: true },
+      { overPolished: true, tilted: true },
+    ];
+    for (const inc of combos) {
+      const t = getTitle({ ...input('高・低・中・低', inc), dustCoated: true });
+      expect(t.title).toBe(COAT);
+      expect(t.comment).toBe('砂粒で画面を守ることにしました');
+    }
+  });
+
+  it('埃取りの前や途中で時間切れになった（押していない）ときはつけない', () => {
+    expect(isDustCoated([{ stage: 'wipe', quality: 1 }])).toBe(false);
+    expect(isDustCoated([{ stage: 'dust', quality: 0 }])).toBe(false);
   });
 });

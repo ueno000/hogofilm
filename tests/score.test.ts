@@ -99,6 +99,7 @@ describe('やらかし', () => {
       scores: { speed: 50, screen: 90, film: 100 },
       tiers: { speed: 'mid', screen: 'high', film: 'high' },
       bubbleTier: 'high',
+      dustCoated: false,
       incidents: { dropped: false, overPolished: true, tilted: false },
     });
   });
@@ -184,8 +185,14 @@ describe('share', () => {
     scores: { speed: 67, screen: 90, film: 85 },
     tiers: { speed: 'mid', screen: 'high', film: 'high' },
     bubbleTier: 'mid',
+    dustCoated: false,
     incidents: { dropped: false, overPolished: false, tilted: false },
     ...over,
+  });
+
+  it('埃が規定の数以上残ったときは、投稿文の称号も単独の称号になる（R-13）', () => {
+    const text = buildShareText(outcome({ dustCoated: true, incidents: { dropped: true, overPolished: true, tilted: false } }));
+    expect(text).toContain('称号「フィルム代わりの砂粒コーティング、自然由来のフィルム貼り師」');
   });
 
   it('点数の軸3つと称号を含む投稿文とXの投稿URLを作る', () => {
@@ -260,6 +267,7 @@ describe('やらかし「斜め貼り」（T-4）', () => {
       scores: { speed: 67, screen: 90, film: 30 },
       tiers: { speed: 'mid', screen: 'high', film: 'low' },
       bubbleTier: 'low',
+      dustCoated: false,
       incidents: { dropped: false, overPolished: true, tilted: true },
     };
     expect(buildShareText(outcome)).toContain('やらかし：研磨しすぎ・斜め貼り');

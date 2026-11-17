@@ -1,6 +1,7 @@
 import type { EndReason, Incidents, ScoreAxis, Scores, StageId, StageResult, Tier } from './types';
 import { param } from './params';
 import { isTilted } from '../stages/logic/tack';
+import { DUST_TITLE_MIN } from '../stages/logic/dust';
 
 /** 残り時間がこれ以上なら手早さ 100点（ms） */
 export const SPEED_FULL_REMAIN_MS = param('SPEED_FULL_REMAIN_MS');
@@ -63,6 +64,8 @@ export interface Evaluation {
   tiers: Record<ScoreAxis, Tier>;
   /** 気泡抜きの段階（B-6） */
   bubbleTier: Tier;
+  /** 埃が規定の数以上残った（R-13） */
+  dustCoated: boolean;
   incidents: Incidents;
 }
 
@@ -73,6 +76,15 @@ export interface Evaluation {
 export function bubbleTier(results: readonly StageResult[]): Tier {
   const bubbles = results.find((r) => r.stage === 'bubbles');
   return scoreTier(toPoints(100 * clamp01(bubbles?.quality ?? 0)));
+}
+
+/**
+ * 「貼り始める」を押したときに残っていた埃が規定の数以上か（R-13）。
+ * 埃取りの前や途中で時間切れになったとき（押していないとき）はつけない
+ */
+export function isDustCoated(results: readonly StageResult[]): boolean {
+  const dust = results.find((r) => r.stage === 'dust');
+  return (dust?.dustLeft ?? 0) >= DUST_TITLE_MIN;
 }
 
 /** 仮固定でフィルムが大きく傾いたら「斜め貼り」。落下したときはフィルムを貼らないのでつけない（T-4） */
@@ -98,6 +110,7 @@ export function evaluate(
     scores,
     tiers: { speed: scoreTier(scores.speed), screen: scoreTier(scores.screen), film: scoreTier(scores.film) },
     bubbleTier: bubbleTier(results),
+    dustCoated: isDustCoated(results),
     incidents: { dropped, overPolished: isOverPolished(results), tilted: isTiltedFilm(results, dropped) },
   };
 }

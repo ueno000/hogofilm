@@ -10,6 +10,7 @@ const outcome: GameOutcome = {
   scores: { speed: 67, screen: 90, film: 85 },
   tiers: { speed: 'mid', screen: 'high', film: 'high' },
   bubbleTier: 'mid',
+  dustCoated: false,
   incidents: { dropped: true, overPolished: false, tilted: false },
 };
 
