@@ -8,6 +8,8 @@ export interface StageDetail {
   scratchedRatio?: number;
   /** 仮固定の工程で、4隅の判定から決まったフィルムの角度（度）。やらかし「斜め貼り」の判定に使う */
   tiltDeg?: number;
+  /** 埃取りの工程で「貼り始める」を押したときに残っていた埃の数。単独の称号（R-13）の判定に使う */
+  dustLeft?: number;
 }
 
 /** 各工程の仕上がり。quality は 0（最悪）〜 1（完璧）。 */
@@ -73,6 +75,8 @@ export interface GameOutcome {
   tiers: Record<ScoreAxis, Tier>;
   /** 気泡抜きの段階（称号の単語に使う。B-6） */
   bubbleTier: Tier;
+  /** 埃が規定の数以上残った（単独の称号「砂粒コーティング」にする。R-13） */
+  dustCoated: boolean;
   incidents: Incidents;
   /** 結果画面の絵に使う終わりの状態 */
   picture: FinishPicture;
