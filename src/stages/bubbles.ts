@@ -1,4 +1,5 @@
 import { filmGroup } from './film';
+import { mountFingerCursor } from './fingerCursor';
 import { SCREEN } from './phone';
 import { createDelays, createStageView, nextButton } from './shell';
 import { svgEl, trackPointer } from './svg';
@@ -7,6 +8,7 @@ import {
   BUBBLE_RETURN_MS,
   bubbleQuality,
   createBubbles,
+  FINGER_RADIUS,
   pushBubbles,
   releaseBubbles,
   returnPosition,
@@ -134,6 +136,9 @@ export const bubblesStage: Stage = {
       },
     });
 
+    // PC ではカーソルを指の絵にする（B-5）。気泡より手前に描くので最後に置く
+    const unmountFinger = mountFingerCursor(view, FINGER_RADIUS);
+
     view.controls.append(nextButton('ここまでで仕上げ', () => {
       if (done) return;
       done = true;
@@ -145,6 +150,7 @@ export const bubblesStage: Stage = {
     return () => {
       done = true;
       untrack();
+      unmountFinger();
       stopReturns();
       delays.clear();
     };
