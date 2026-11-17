@@ -23,7 +23,8 @@
 - ゲーム操作領域には`touch-action`を設定し、ドラッグ中にブラウザのスクロールや拡大操作が干渉しないようにする。
 - 初版ではReact、ゲームエンジン、物理演算ライブラリ、音声ライブラリを追加しない。効果音も初版の対象外とする。
 - スマートフォンはタッチ操作、PCはマウスとキーボード操作に対応する。
-- 公開先は GitHub Pages（https://ueno000.github.io/hogofilm/）。`main` に入った内容を GitHub Actions（`.github/workflows/deploy.yml`）でテスト・ビルドして公開する。OG表示は #69 で設定する。
+- 公開先は GitHub Pages（https://ueno000.github.io/hogofilm/）。`main` に入った内容を GitHub Actions（`.github/workflows/deploy.yml`）でテスト・ビルドして公開する。
+- URL を SNS やメッセージに貼ったときのカード（OGP・X カード、R-12）は `index.html` に書く。画像は `public/og-card.png`（1200×630、ゲーム名とスマホにフィルムを貼る絵。元絵は `scripts/og-card.html`）、見出しは「保護フィルム貼りゲーム」、説明は「90秒で保護フィルムを貼る。拭く・埃取り・位置合わせ・仮固定・気泡抜き」。静的なサイトなので結果ごとには変えない。
 
 ## 画面とシェア
 

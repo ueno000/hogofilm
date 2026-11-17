@@ -1,0 +1,98 @@
+<!doctype html>
+<!--
+  URL を貼ったときのカード画像（OGP, #69 / R-12）の元絵。1200×630。
+  PNG にするときは、リポジトリのルートで次を実行して public/og-card.png を上書きする（依存は足さない）。
+
+  "C:\Program Files (x86)\Microsoft\Edge\Application\msedge.exe" --headless --disable-gpu --hide-scrollbars --force-device-scale-factor=1 --screenshot="%CD%\public\og-card.png" --window-size=1200,630 "file:///%CD%/scripts/og-card.html"
+
+  色とスマホの形はゲーム本体（src/style.css の :root、src/stages/phone.ts / film.ts）に合わせている。
+-->
+<html lang="ja">
+  <head>
+    <meta charset="UTF-8" />
+    <title>OGP カード</title>
+    <style>
+      html, body { margin: 0; width: 1200px; height: 630px; overflow: hidden; }
+      body {
+        background: #fff6d6;
+        color: #2b2140;
+        font-family: 'Hiragino Maru Gothic ProN', 'M PLUS Rounded 1c', 'Yu Gothic UI', system-ui, sans-serif;
+        display: flex;
+        align-items: center;
+        gap: 40px;
+        padding: 0 70px 0 90px;
+        box-sizing: border-box;
+        position: relative;
+      }
+      /* 背景の水玉（ポップ調） */
+      body::before {
+        content: '';
+        position: absolute;
+        inset: 0;
+        background-image: radial-gradient(#ffd84d 9px, transparent 10px);
+        background-size: 56px 56px;
+        opacity: 0.55;
+      }
+      .art, .text { position: relative; }
+      .art svg { display: block; height: 540px; width: auto; }
+      .phone__body { fill: #2b2140; }
+      .phone__screen { fill: #bfe9ff; }
+      .film__sheet { fill: rgba(255, 255, 255, 0.45); stroke: #ffffff; stroke-width: 2; }
+      .shine { fill: #ffffff; opacity: 0.8; }
+      .text { display: flex; flex-direction: column; gap: 26px; }
+      .eyebrow {
+        align-self: flex-start;
+        background: #ff5c8a;
+        color: #fff;
+        font-weight: 800;
+        font-size: 34px;
+        padding: 6px 26px;
+        border: 4px solid #2b2140;
+        border-radius: 999px;
+        box-shadow: 0 5px 0 #2b2140;
+      }
+      h1 {
+        margin: 0;
+        font-size: 96px;
+        line-height: 1.12;
+        font-weight: 900;
+        color: #ffd84d;
+        -webkit-text-stroke: 4px #2b2140;
+        paint-order: stroke fill;
+        text-shadow: 0 8px 0 #2b2140;
+      }
+      .desc {
+        margin: 0;
+        font-size: 34px;
+        font-weight: 800;
+        line-height: 1.5;
+        background: #ffffff;
+        border: 4px solid #2b2140;
+        border-radius: 22px;
+        padding: 14px 26px;
+        box-shadow: 0 5px 0 #2b2140;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="art">
+      <!-- スマホ（200×400 の座標系）に、フィルムを斜め上から貼りかけている絵 -->
+      <svg viewBox="-20 -60 280 470" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+        <rect x="4" y="4" width="192" height="392" rx="30" class="phone__body" />
+        <rect x="14" y="22" width="172" height="356" rx="20" class="phone__screen" />
+        <rect x="78" y="30" width="44" height="10" rx="5" class="phone__body" />
+        <g transform="translate(34 -40) rotate(9 100 200)">
+          <path class="film__sheet" fill-rule="evenodd"
+            d="M34 24 H168 A18 18 0 0 1 186 42 V358 A18 18 0 0 1 168 376 H34 A18 18 0 0 1 16 358 V42 A18 18 0 0 1 34 24 Z M83 27 H117 A8 8 0 0 1 117 43 H83 A8 8 0 0 1 83 27 Z" />
+          <path class="shine" d="M40 70 L70 50 L74 56 L44 76 Z" />
+          <path class="shine" d="M40 92 L96 54 L99 60 L43 98 Z" />
+        </g>
+      </svg>
+    </div>
+    <div class="text">
+      <p class="eyebrow">90秒チャレンジ</p>
+      <h1>保護フィルム<br />貼りゲーム</h1>
+      <p class="desc">90秒で保護フィルムを貼る。<br />拭く・埃取り・位置合わせ・<br />仮固定・気泡抜き</p>
+    </div>
+  </body>
+</html>
