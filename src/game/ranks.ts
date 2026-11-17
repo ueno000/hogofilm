@@ -11,7 +11,7 @@ export interface Title {
 /** 判定キーで使う段階の表記 */
 const TIER_KEY: Record<Tier, string> = { high: '高', mid: '中', low: '低' };
 
-/** 称号とひとこと（全34種類）。企画管理シートの称号タブを正とする */
+/** 称号とひとこと（全38種類）。企画管理シートの称号タブを正とする */
 const TABLE: ReadonlyArray<[key: string, title: string, comment: string]> = [
   // やらかしが2つとも
   ['研磨+落下', '素の画面派', '削れた画面に、フィルムは来ませんでした。'],
@@ -51,6 +51,11 @@ const TABLE: ReadonlyArray<[key: string, title: string, comment: string]> = [
   ['低低高', '貼るのだけ名人', '時間をかけたのは、貼るところだけでした。'],
   ['低低中', '迷子の職人', '時間をかけて、迷いながら着地しました。'],
   ['低低低', '全部これから', '伸びしろしかありません。'],
+  // 斜め貼り（No.35〜38）。研磨しすぎと重なったとき、斜め貼りだけのとき（画面の綺麗さの段階で決める）
+  ['研磨+斜め', '傾いた基板', '削れた画面に、フィルムまで斜めに乗りました。'],
+  ['斜め|高', '傾いた額縁', '画面はピカピカ。フィルムだけが少し首をかしげています。'],
+  ['斜め|中', '斜め貼り名人', '画面に新しい傾きを与える大胆な仕上がり。'],
+  ['斜め|低', 'ななめの埃だまり', '傾いたフィルムの下で、埃たちが坂を転がっています。'],
 ];
 
 export const TITLES: readonly Title[] = TABLE.map(([key, title, comment], i) => ({ no: i + 1, key, title, comment }));
@@ -59,14 +64,16 @@ const BY_KEY = new Map(TITLES.map((t) => [t.key, t]));
 
 /**
  * 評価から判定キーを作る。優先順位:
- * 1. やらかしが2つとも → `研磨+落下`
- * 2. 落下だけ → `落下|<画面の綺麗さの段階>`、研磨しすぎだけ → `研磨|<フィルムの貼り方の段階>`
+ * 1. やらかしが2つ → `研磨+落下` / `研磨+斜め`（落下と斜め貼りは同時につかない）
+ * 2. やらかしが1つ → `落下|<画面の綺麗さの段階>`、`研磨|<フィルムの貼り方の段階>`、`斜め|<画面の綺麗さの段階>`
  * 3. やらかしなし → 手早さ・画面の綺麗さ・フィルムの貼り方の段階を並べる（例: `高中低`）
  */
 export function titleKey(tiers: Record<ScoreAxis, Tier>, incidents: Incidents): string {
   if (incidents.dropped && incidents.overPolished) return '研磨+落下';
+  if (incidents.overPolished && incidents.tilted) return '研磨+斜め';
   if (incidents.dropped) return `落下|${TIER_KEY[tiers.screen]}`;
   if (incidents.overPolished) return `研磨|${TIER_KEY[tiers.film]}`;
+  if (incidents.tilted) return `斜め|${TIER_KEY[tiers.screen]}`;
   return `${TIER_KEY[tiers.speed]}${TIER_KEY[tiers.screen]}${TIER_KEY[tiers.film]}`;
 }
 

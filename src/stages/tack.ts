@@ -3,6 +3,7 @@ import { createDelays, createStageView } from './shell';
 import { svgEl, trackPointer } from './svg';
 import type { Stage } from './stage';
 import {
+  filmAngle,
   isRingExpired,
   judgeTap,
   JUDGMENT_LABEL,
@@ -11,7 +12,10 @@ import {
   ringRadius,
   shouldDrop,
   tackQuality,
+  tapDirection,
+  tiltFor,
   type Judgment,
+  type TapDirection,
 } from './logic/tack';
 import { param } from '../game/params';
 
@@ -29,9 +33,16 @@ export const tackStage: Stage = {
     const delays = createDelays();
     const corners = filmCorners();
     const judgments: Judgment[] = [];
+    /** 隅ごとの傾き（度）。合計がフィルムの角度になる（T-2） */
+    const tilts: number[] = [];
+    ctx.picture(() => ({ tilt: filmAngle(tilts) }));
 
     const film = filmGroup();
     view.layer.append(film);
+    // 判定に応じてフィルムを傾ける。角度の数字は出さない（T-4: 工程の中では表示しない）
+    const showTilt = () => {
+      film.style.transform = `rotate(${filmAngle(tilts)}deg)`;
+    };
 
     const markers = corners.map((c) => {
       const g = svgEl('g', { class: 'corner', transform: `translate(${c.x} ${c.y})` });
@@ -68,13 +79,14 @@ export const tackStage: Stage = {
         if (!active) return;
         const elapsed = performance.now() - ringStart;
         ring.setAttribute('r', ringRadius(elapsed).toFixed(2));
-        if (isRingExpired(elapsed)) return resolve('miss');
+        // タップせずにリングが消えたら、遅すぎた MISS として右回りに傾ける
+        if (isRingExpired(elapsed)) return resolve('miss', 1);
         rafId = requestAnimationFrame(loop);
       };
       rafId = requestAnimationFrame(loop);
     };
 
-    const resolve = (j: Judgment) => {
+    const resolve = (j: Judgment, direction: TapDirection) => {
       if (!active) return;
       active = false;
       cancelAnimationFrame(rafId);
@@ -90,6 +102,7 @@ export const tackStage: Stage = {
       label.setAttribute('class', `judge is-${j}`);
       renderStatus();
 
+      // 落としたときは傾けない（そのまま落ちる）
       if (shouldDrop(judgments)) {
         finished = true;
         film.classList.add('is-falling');
@@ -98,11 +111,14 @@ export const tackStage: Stage = {
         delays.later(() => ctx.drop(), 900);
         return;
       }
+      tilts.push(tiltFor(j, direction));
+      showTilt();
       index += 1;
       if (index >= corners.length) {
         finished = true;
         view.playfield.classList.add('is-cleared');
-        delays.later(() => ctx.complete(tackQuality(judgments)), 500);
+        const angle = filmAngle(tilts);
+        delays.later(() => ctx.complete(tackQuality(angle), { tiltDeg: angle }), 500);
         return;
       }
       delays.later(startRing, BETWEEN_DELAY);
@@ -110,7 +126,8 @@ export const tackStage: Stage = {
 
     const tap = () => {
       if (!active) return;
-      resolve(judgeTap(performance.now() - ringStart));
+      const elapsed = performance.now() - ringStart;
+      resolve(judgeTap(elapsed), tapDirection(elapsed));
     };
 
     const untrack = trackPointer(view.playfield, view.svg, {

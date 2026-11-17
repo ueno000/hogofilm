@@ -1,5 +1,6 @@
 import type { EndReason, Incidents, ScoreAxis, Scores, StageId, StageResult, Tier } from './types';
 import { param } from './params';
+import { isTilted } from '../stages/logic/tack';
 
 /** 残り時間がこれ以上なら手早さ 100点（ms） */
 export const SPEED_FULL_REMAIN_MS = param('SPEED_FULL_REMAIN_MS');
@@ -63,7 +64,14 @@ export interface Evaluation {
   incidents: Incidents;
 }
 
-/** 工程結果から、点数の軸3つ・段階・やらかしの軸2つを求める。 */
+/** 仮固定でフィルムが大きく傾いたら「斜め貼り」。落下したときはフィルムを貼らないのでつけない（T-4） */
+export function isTiltedFilm(results: readonly StageResult[], dropped: boolean): boolean {
+  if (dropped) return false;
+  const tack = results.find((r) => r.stage === 'tack');
+  return tack?.tiltDeg !== undefined && isTilted(tack.tiltDeg);
+}
+
+/** 工程結果から、点数の軸3つ・段階・やらかしの軸3つを求める。 */
 export function evaluate(
   results: readonly StageResult[],
   reason: EndReason,
@@ -78,6 +86,6 @@ export function evaluate(
   return {
     scores,
     tiers: { speed: scoreTier(scores.speed), screen: scoreTier(scores.screen), film: scoreTier(scores.film) },
-    incidents: { dropped, overPolished: isOverPolished(results) },
+    incidents: { dropped, overPolished: isOverPolished(results), tilted: isTiltedFilm(results, dropped) },
   };
 }

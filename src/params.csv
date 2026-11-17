@@ -38,6 +38,11 @@ JUDGE_PERFECT,3,SVG座標,仮固定,PERFECT の判定幅
 JUDGE_GOOD,7,SVG座標,仮固定,GOOD の判定幅
 JUDGE_BAD,12,SVG座標,仮固定,BAD の判定幅（超えると MISS）
 MAX_MISSES,2,回,仮固定,この回数 MISS でフィルム落下
+TACK_TILT_GOOD,1,度,仮固定,GOOD のときのフィルムの傾き（早いと左回り、遅いと右回り）
+TACK_TILT_BAD,2.5,度,仮固定,BAD のときのフィルムの傾き
+TACK_TILT_MISS,4,度,仮固定,MISS（落下しない1回目）のときのフィルムの傾き
+TACK_TILT_TOLERANCE,6,度,仮固定,この角度で仮固定の品質が 0
+TACK_TILT_LIMIT,4,度,仮固定,角度の大きさがこれ以上で「斜め貼りあり」
 TAP_RANGE,48,SVG座標,仮固定,隅のタップ受付範囲
 FIRST_DELAY,700,ms,仮固定,最初のリングが出るまでの待ち
 BETWEEN_DELAY,450,ms,仮固定,隅と隅の間の待ち

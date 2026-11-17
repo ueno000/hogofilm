@@ -18,6 +18,7 @@ export const TIER_LABEL: Record<Tier, string> = { high: '高', mid: '中', low: 
 export const INCIDENT_LABEL: Record<keyof Incidents, string> = {
   dropped: '落下',
   overPolished: '研磨しすぎ',
+  tilted: '斜め貼り',
 };
 
 /** ついたやらかしの名前（なければ空） */
