@@ -1,45 +1,86 @@
-export interface Rank {
-  no: number;
-  min: number;
-  max: number;
+import type { Incidents, ScoreAxis, Tier } from './types';
+import { TITLE_COMMENTS, TITLE_WORDS, type WordKey } from './titles';
+
+/** 判定キーで使う段階の表記 */
+const TIER_KEY: Record<Tier, string> = { high: '高', mid: '中', low: '低' };
+
+/** 称号を決めるのに使う評価 */
+export interface TitleInput {
+  /** 点数の軸3つの段階 */
+  tiers: Record<ScoreAxis, Tier>;
+  /** 気泡抜きの段階（B-6） */
+  bubbleTier: Tier;
+  /** 埃が規定の数以上残った（R-13）。省略時はなし */
+  dustCoated?: boolean;
+  incidents: Incidents;
+}
+
+export interface Title {
+  /** ひとことの判定キー（シートの称号タブと同じ表記）。例: `研磨+落下`, `落下|高`, `高中低`, `砂粒` */
+  key: string;
+  /** あてはまる要素の言葉をつなげた称号（R-8） */
   title: string;
+  /** ひとこと */
   comment: string;
 }
 
-const TABLE: ReadonlyArray<[string, string]> = [
-  ['フィルム遭難', '画面より先に、フィルムの心が折れました。'],
-  ['気泡の温泉宿', '気泡たちが気持ちよさそうにくつろいでいます。'],
-  ['砂粒コレクター', '小さな粒まで、しっかり保存できました。'],
-  ['斜め貼り名人', '画面に新しい傾きを与える大胆な仕上がり。'],
-  ['指紋アーティスト', '作品の主役は、あなたの指紋です。'],
-  ['気泡の大家さん', '気泡に広めのお部屋を貸してあげました。'],
-  ['端っこ惜しい賞', 'もう少しで端まで届くところでした。'],
-  ['なんとか着地', '完璧ではないけれど、画面には乗りました。'],
-  ['粘り腰の職人', '苦戦の跡も、味わいのひとつです。'],
-  ['半分つるつる', 'きれいな場所が、ちゃんと増えてきました。'],
-  ['まずまず保護', '画面を守る仕事は、ひとまず合格です。'],
-  ['気泡お引っ越し係', '大きな気泡は、だいぶ退去してくれました。'],
-  ['まじめな貼り手', '丁寧さが少しずつ仕上がりに出ています。'],
-  ['端まであと一歩', '端っこも、もう少しで納得してくれそう。'],
-  ['いい感じ職人', '画面を見るたび、ちょっと嬉しくなる仕上がり。'],
-  ['気泡キラー', '気泡たちに、ほぼ勝利しました。'],
-  ['つるピカ担当', '指が画面をすいすい滑りそうです。'],
-  ['貼り付けの達人', '手際も仕上がりも、かなりのものです。'],
-  ['ほぼ無の境地', 'フィルムの存在を忘れるほど自然です。'],
-  ['保護フィルム仙人', '埃もズレも気泡も、悟りの彼方へ。'],
-];
+/**
+ * ひとことの判定キーを作る。優先順位:
+ * 1. やらかしが2つ → `研磨+落下` / `研磨+斜め`（落下と斜め貼りは同時につかない）
+ * 2. やらかしが1つ → `落下|<画面の綺麗さの段階>`、`研磨|<フィルムの貼り方の段階>`、`斜め|<画面の綺麗さの段階>`
+ * 3. やらかしなし → 手早さ・画面の綺麗さ・フィルムの貼り方の段階を並べる（例: `高中低`）
+ */
+export function titleKey(tiers: Record<ScoreAxis, Tier>, incidents: Incidents): string {
+  if (incidents.dropped && incidents.overPolished) return '研磨+落下';
+  if (incidents.overPolished && incidents.tilted) return '研磨+斜め';
+  if (incidents.dropped) return `落下|${TIER_KEY[tiers.screen]}`;
+  if (incidents.overPolished) return `研磨|${TIER_KEY[tiers.film]}`;
+  if (incidents.tilted) return `斜め|${TIER_KEY[tiers.screen]}`;
+  return `${TIER_KEY[tiers.speed]}${TIER_KEY[tiers.screen]}${TIER_KEY[tiers.film]}`;
+}
 
-/** 20段階：0〜4, 5〜9, …, 90〜94, 95〜100 */
-export const RANKS: readonly Rank[] = TABLE.map(([title, comment], i) => ({
-  no: i + 1,
-  min: i * 5,
-  max: i === TABLE.length - 1 ? 100 : i * 5 + 4,
-  title,
-  comment,
-}));
+/** 埃が規定の数以上残ったときのひとことの判定キー（R-13） */
+export const DUST_COAT_KEY = '砂粒';
 
-/** スコアに対応する称号。範囲外・非整数は 0〜100 の整数に丸めてから判定する。 */
-export function getRank(score: number): Rank {
-  const s = Number.isFinite(score) ? Math.min(100, Math.max(0, Math.floor(score))) : 0;
-  return RANKS[Math.min(RANKS.length - 1, Math.floor(s / 5))];
+/**
+ * あてはまる要素の言葉をつなげて称号を作る（R-8, B-6）。word は単語の key から単語を返す（空欄なら ''）。
+ * - 並び: 手早さ → フィルムの貼り方（斜め貼りのときは「斜め貼り」）→ 気泡抜き → 研磨しすぎ → 画面の綺麗さ（最後の名詞）
+ * - 落下したとき: 手早さ → 研磨しすぎ → 画面の綺麗さ（落下用）→ 「フィルムデストロイヤー」。貼り方・気泡抜きは付けない
+ * - 手早さ・画面の綺麗さ・フィルムの貼り方・気泡抜きがすべて高で、やらかしがないときだけ例外の名前
+ * - 埃が規定の数以上残ったとき（R-13）は、落下・研磨しすぎ・斜め貼りがあっても他の言葉とつなげず単独の称号
+ */
+export function buildTitle(input: TitleInput, word: (key: WordKey) => string): string {
+  const { tiers, bubbleTier, incidents } = input;
+  if (input.dustCoated) return word('dustCoat');
+  const noIncident = !incidents.dropped && !incidents.overPolished && !incidents.tilted;
+  const allHigh = tiers.speed === 'high' && tiers.screen === 'high' && tiers.film === 'high' && bubbleTier === 'high';
+  if (noIncident && allHigh) return word('perfect');
+
+  const parts: string[] = [word(`speed.${tiers.speed}`)];
+  if (incidents.dropped) {
+    if (incidents.overPolished) parts.push(word('overPolished'));
+    parts.push(word(`dropScreen.${tiers.screen}`), word('drop'));
+  } else {
+    parts.push(incidents.tilted ? word('tilt') : word(`film.${tiers.film}`));
+    parts.push(word(`bubble.${bubbleTier}`));
+    if (incidents.overPolished) parts.push(word('overPolished'));
+    parts.push(word(`screen.${tiers.screen}`));
+  }
+  return parts.join('');
+}
+
+/** src/titles.csv の単語を引く（空欄なら ''） */
+function csvWord(key: WordKey): string {
+  return TITLE_WORDS.get(key) ?? '';
+}
+
+/** 評価から称号とひとことを決める。称号は言葉をつなげて作り、ひとことは判定キーの表から引く */
+export function getTitle(input: TitleInput): Title {
+  const key = input.dustCoated ? DUST_COAT_KEY : titleKey(input.tiers, input.incidents);
+  return {
+    key,
+    title: buildTitle(input, csvWord),
+    // 判定キーはすべて CSV にそろっていることを起動時に確かめている（TITLE_ERRORS）
+    comment: TITLE_COMMENTS.get(key)?.text ?? '',
+  };
 }

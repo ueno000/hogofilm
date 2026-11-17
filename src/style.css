@@ -138,7 +138,7 @@ h1, h2, p { margin: 0; }
 
 /* HUD */
 .screen--play { gap: 10px; }
-.hud { width: 100%; display: grid; gap: 6px; }
+.hud { width: 100%; display: grid; gap: 6px; position: relative; }
 .hud__row { display: flex; align-items: center; gap: 8px; font-weight: 800; }
 .hud__step {
   background: var(--yellow);
@@ -151,7 +151,63 @@ h1, h2, p { margin: 0; }
 .hud__time { font-variant-numeric: tabular-nums; min-width: 4.5em; text-align: right; }
 .hud__time.is-danger { color: var(--danger); }
 .hud__bar { height: 10px; border: 2px solid var(--line); border-radius: 999px; overflow: hidden; background: var(--card); }
-.hud__bar-fill { height: 100%; background: var(--accent); transform-origin: left; }
+.hud__bar-fill { height: 100%; background: var(--time-normal); transform-origin: left; transition: background-color 0.3s; }
+
+/* 時間演出（U-1〜U-4）: ゲージの色は 通常（緑）→ 半分経過（黄）→ 残りわずか（赤） */
+:root { --time-normal: #4fd27a; }
+.hud[data-phase='warn'] .hud__bar-fill { background: var(--yellow); }
+.hud[data-phase='danger'] .hud__bar-fill { background: var(--danger); }
+/* 半分を過ぎた瞬間に一度ぴょんと跳ねる */
+.hud__bar.is-hop { animation: bar-hop 0.45s ease-out; }
+@keyframes bar-hop {
+  0% { transform: translateY(0); }
+  35% { transform: translateY(-7px) scaleY(1.25); }
+  70% { transform: translateY(1px); }
+  100% { transform: translateY(0); }
+}
+/* 「半分経過！」「残り10秒！」。HUD の中だけに、操作のじゃまにならないよう重ねて出す */
+.hud__notice {
+  position: absolute;
+  left: 50%;
+  /* 工程名の行に重ねる（HUD からはみ出さない） */
+  top: 0;
+  margin: 0;
+  padding: 2px 12px;
+  border: 2px solid var(--line);
+  border-radius: 999px;
+  background: var(--yellow);
+  color: #2b2140;
+  font-weight: 900;
+  white-space: nowrap;
+  pointer-events: none;
+  opacity: 0;
+  transform: translate(-50%, 0) scale(0.6);
+  transition: opacity 0.15s, transform 0.15s;
+  z-index: 2;
+}
+.hud__notice.is-shown { opacity: 1; transform: translate(-50%, 0) scale(1); }
+.hud[data-phase='danger'] .hud__notice { background: var(--danger); color: #fff; }
+/* 残りわずか: 秒数を大きくし、ゲージと秒数が1秒ごとに脈打つ */
+.hud__time.is-danger { font-size: 22px; }
+.hud__time.is-pulse, .hud__bar.is-pulse { animation: time-pulse 0.4s ease-out; }
+@keyframes time-pulse {
+  0% { transform: scale(1.18); }
+  100% { transform: scale(1); }
+}
+/* 残りわずか: 画面の外枠がうっすら赤く点滅する */
+.screen--play.is-danger::after {
+  content: '';
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  box-shadow: inset 0 0 0 4px rgba(255, 107, 61, 0.55), inset 0 0 28px rgba(255, 107, 61, 0.45);
+  animation: frame-flash 1s ease-in-out infinite;
+  z-index: 10;
+}
+@keyframes frame-flash {
+  0%, 100% { opacity: 0.25; }
+  50% { opacity: 1; }
+}
 
 /* Stage */
 .stage-area { width: 100%; flex: 1; display: flex; flex-direction: column; align-items: center; gap: 10px; min-height: 0; }
@@ -175,17 +231,107 @@ h1, h2, p { margin: 0; }
 .stage-controls > .btn { width: 100%; max-width: 320px; }
 
 /* 拭く */
-.smudge__base { fill: var(--smudge); opacity: 0.55; }
-.smudge__spot { fill: var(--smudge); opacity: 0.45; }
+.smudge__cell { fill: var(--smudge); transition: opacity 0.15s; }
+.board__cell { opacity: 0; transition: opacity 0.2s; }
+.board__cell.is-exposed { opacity: 1; }
+.board__base { fill: #1f7a3d; }
+.board__trace { fill: none; stroke: #d8b44a; stroke-width: 1.4; }
+.board__pad { fill: #d8b44a; }
+/* ウェットシート（W-8）。離している間は画面の右下の横に置く（スマホの外へはみ出して描く） */
+.playfield[data-stage='wipe'] { overflow: clip; }
+.playfield[data-stage='wipe'] .phone { overflow: visible; }
+.wet-sheet { pointer-events: none; }
+.wet-sheet__back { fill: #b9dceb; stroke: #2b2140; stroke-width: 1.5; }
+.wet-sheet__cloth { fill: #f4fbff; stroke: #2b2140; stroke-width: 1.5; }
+.wet-sheet__fold { stroke: #9cc7da; stroke-width: 1.4; }
+.wet-sheet__crease { fill: none; stroke: #cfe6f0; stroke-width: 1.2; stroke-linecap: round; }
+.wet-sheet__drop { fill: #7fd0f5; }
+/* 拭いている間は少し持ち上げたように影を付ける */
+.wet-sheet.is-wiping .wet-sheet__body { filter: drop-shadow(0 2px 0 rgba(43, 33, 64, 0.35)); }
+/* 拭いた跡が濡れて光り、少しして乾く（見た目だけ） */
+.wet-trail { pointer-events: none; }
+.wet-trail__mark { fill: rgba(255, 255, 255, 0.55); animation: wet-dry linear forwards; }
+@keyframes wet-dry {
+  from { opacity: 0.8; }
+  to { opacity: 0; }
+}
 
 /* 埃 */
 .dust__speck { fill: #3a2f2a; stroke: #fff; stroke-width: 1; }
-.dust { transition: opacity 0.2s, transform 0.2s; }
+.dust { transition: opacity 0.2s; }
 .dust.is-removed { opacity: 0; }
+/* 上から降ってくる見た目（判定はすぐ着地扱い。D-3 の承認後に見直す） */
+.dust.is-falling .dust__speck { animation: dust-fall 0.3s ease-in; }
+@keyframes dust-fall {
+  from { transform: translateY(-40px); opacity: 0; }
+  to { transform: translateY(0); opacity: 1; }
+}
+/* 埃取りシール（D-6） */
+.sticker { pointer-events: none; }
+.sticker__sheet { fill: #ffffff; stroke: #2b2140; stroke-width: 1.5; }
+.sticker__glue { fill: #f1f6fb; }
+.sticker__shine { fill: none; stroke: #ffffff; stroke-width: 2; stroke-linecap: round; opacity: 0.9; }
+.sticker__dust { stroke-width: 0.6; }
+/* PC のカーソル代わりのシール。押し当てている間は隠す */
+.sticker--cursor { opacity: 0.85; transition: opacity 0.1s; }
+.sticker--cursor.is-hidden, .sticker--cursor.is-stamping { opacity: 0; }
+.playfield.has-sticker-cursor { cursor: none; }
+/* 押した瞬間に少しつぶれ、少しして浮き上がって消える */
+.sticker__body { transform-box: fill-box; transform-origin: 50% 50%; }
+.sticker--stamp.is-pressed .sticker__body { animation: sticker-press 0.25s ease-out; }
+.sticker--stamp.is-lifting { animation: sticker-lift 0.3s ease-in forwards; }
+@keyframes sticker-press {
+  0% { transform: scale(1.15); }
+  40% { transform: scale(1.08, 0.86); }
+  100% { transform: scale(1); }
+}
+@keyframes sticker-lift {
+  to { opacity: 0; }
+}
+/* 残りの埃の段階（D-7）。太く目立つ文字で、段階ごとに色を変える */
+.dust-level {
+  font-size: 24px;
+  font-weight: 900;
+  letter-spacing: 0.06em;
+  -webkit-text-stroke: 1px var(--line);
+  paint-order: stroke fill;
+  text-shadow: 0 2px 0 var(--line);
+}
+.dust-level.is-mamire { color: #ff4d4d; }
+.dust-level.is-darake { color: #ff9a3d; }
+.dust-level.is-ari { color: #b8b4c2; }
+.dust-level.is-kirei { color: #4fd27a; }
+/* 完璧: 金色で、きらっと光らせる */
+.dust-level.is-kanpeki {
+  color: transparent;
+  background: linear-gradient(110deg, #e0a800 0%, #ffd84d 35%, #fffbe6 50%, #ffd84d 65%, #e0a800 100%);
+  background-size: 250% 100%;
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-stroke: 0;
+  text-shadow: none;
+  filter: drop-shadow(0 2px 0 var(--line));
+  animation: dust-shine 1.2s linear infinite, dust-pop 0.35s ease-out;
+}
+@keyframes dust-shine {
+  from { background-position: 100% 0; }
+  to { background-position: -150% 0; }
+}
+@keyframes dust-pop {
+  0% { transform: scale(1.3); }
+  100% { transform: scale(1); }
+}
 
 /* フィルム */
 .film__sheet { fill: rgba(255, 255, 255, 0.35); stroke: rgba(255, 255, 255, 0.95); stroke-width: 1.2; }
 .film { transition: transform 0.12s ease-out; }
+/* 仮固定の判定でフィルムが傾く（T-2）。画面の中心を軸に、少しなめらかに回す */
+.playfield[data-stage='tack'] .film,
+.playfield[data-stage='bubbles'] .film {
+  transform-box: view-box;
+  transform-origin: 50% 50%;
+  transition: transform 0.35s ease-out;
+}
 .film.is-falling, .corner.is-falling {
   animation: film-fall 0.9s ease-in forwards;
   transform-box: view-box;
@@ -205,7 +351,51 @@ h1, h2, p { margin: 0; }
   grid-template-areas: '. up .' 'left . right' '. down .';
   gap: 2px;
 }
-.btn--pad { padding: 0; min-height: 0; font-size: 16px; border-radius: 12px; }
+/* 長押しで動かすので、ずっと押していてもスクロール・選択・長押しメニューが出ないようにする */
+.btn--pad { padding: 0; min-height: 0; font-size: 16px; border-radius: 12px; touch-action: none; user-select: none; -webkit-user-select: none; -webkit-touch-callout: none; }
+/* 長押し中は毎フレーム動かすので、遅れて付いてくる動きを付けない */
+.playfield[data-stage='align'] .film { transition: none; }
+/* 手はスマホの外へはみ出して描く。はみ出しはプレイ領域の中で切る */
+.playfield[data-stage='align'] { overflow: clip; }
+.playfield[data-stage='align'] .phone { overflow: visible; }
+/* フィルムの角を持つ手（見た目だけ。判定には使わない） */
+.hands { pointer-events: none; }
+.hand__skin, .hand__sleeve, .hand__cuff { stroke: #2b2140; stroke-width: 1.5; vector-effect: non-scaling-stroke; stroke-linejoin: round; }
+.hand__skin { fill: #ffcfa6; }
+.hand__sleeve { fill: var(--primary); }
+.hand__cuff { fill: #fff; }
+/* 緊張の演出: 手が小刻みに震える（左右の手で周期をずらす） */
+.hand__tremble { animation: hand-tremble 0.09s steps(1) infinite; }
+.hand--b .hand__tremble { animation-duration: 0.11s; animation-delay: -0.04s; }
+@keyframes hand-tremble {
+  0% { transform: translate(0, 0); }
+  25% { transform: translate(7px, -5px); }
+  50% { transform: translate(-6px, 4px); }
+  75% { transform: translate(5px, 6px); }
+}
+/* 指先の脇の「ぷるぷる線」が速く点滅する */
+.hand__quiver { fill: none; stroke: #fff; stroke-width: 2; stroke-linecap: round; vector-effect: non-scaling-stroke; animation: hand-quiver 0.24s steps(1) infinite; }
+.hand__quiver--outer { animation-delay: -0.12s; }
+@keyframes hand-quiver {
+  0% { opacity: 1; }
+  50% { opacity: 0; }
+}
+/* 汗のしずくが現れて、少し垂れて消えるのを繰り返す */
+.hand__sweat {
+  fill: #9fe3ff;
+  stroke: #2b2140;
+  stroke-width: 1;
+  opacity: 0;
+  transform-box: fill-box;
+  transform-origin: 50% 50%;
+  animation: hand-sweat 1.6s ease-in infinite;
+}
+@keyframes hand-sweat {
+  0% { opacity: 0; transform: translateY(-2px) scale(0.4); }
+  15% { opacity: 1; transform: translateY(0) scale(1); }
+  70% { opacity: 1; transform: translateY(8px) scale(1); }
+  100% { opacity: 0; transform: translateY(12px) scale(0.9); }
+}
 .pad-up { grid-area: up; }
 .pad-down { grid-area: down; }
 .pad-left { grid-area: left; }
@@ -228,6 +418,27 @@ h1, h2, p { margin: 0; }
 .bubble__shine { fill: #fff; }
 .bubble { transition: opacity 0.25s; }
 .bubble.is-out { opacity: 0; }
+/* PC のカーソル代わりの指（B-5）。指はスマホの外へはみ出して描き、プレイ領域の中で切る */
+.playfield[data-stage='bubbles'] { overflow: clip; }
+.playfield[data-stage='bubbles'] .phone { overflow: visible; }
+.playfield.has-finger-cursor { cursor: none; }
+.finger-cursor { pointer-events: none; }
+.finger-cursor.is-hidden { display: none; }
+.finger-cursor__skin { fill: #ffcfa6; stroke: #2b2140; stroke-width: 1.5; stroke-linejoin: round; }
+.finger-cursor__nail { fill: #ffe9dc; stroke: #e6a98a; stroke-width: 0.8; }
+.finger-cursor__crease { fill: none; stroke: #d9906e; stroke-width: 1; stroke-linecap: round; }
+.finger-cursor__contact { fill: rgba(43, 33, 64, 0.28); opacity: 0; transition: opacity 0.08s; }
+.finger-cursor__body { transform-box: fill-box; transform-origin: 50% 0%; transition: transform 0.08s ease-out; }
+/* 押している間は、指先が少し沈んで（縮んで）、触れているところに影が出る */
+.finger-cursor.is-pressed .finger-cursor__body { transform: translateY(2px) scale(0.92, 0.88); }
+.finger-cursor.is-pressed .finger-cursor__contact { opacity: 1; }
+.finger-cursor.is-pressed .finger-cursor__skin { fill: #f7b98e; }
+/* 速すぎて割れた気泡は、はじけたように一瞬ふくらんで縮む（B-1） */
+.bubble.is-split .bubble__body { animation: bubble-split 0.3s ease-out; transform-box: fill-box; transform-origin: 50% 50%; }
+@keyframes bubble-split {
+  0% { transform: scale(1.6); stroke: var(--danger); stroke-width: 2.5; }
+  100% { transform: scale(1); }
+}
 
 /* Phone illustration */
 .phone { display: block; width: 100%; height: auto; }
@@ -237,11 +448,126 @@ h1, h2, p { margin: 0; }
 
 /* Result */
 .screen--result { justify-content: center; }
-.score { display: flex; align-items: baseline; gap: 6px; flex-wrap: wrap; justify-content: center; }
-.score__label { width: 100%; font-weight: 700; color: var(--ink-soft); }
-.score__value { font-size: 88px; font-weight: 900; line-height: 1; color: var(--primary); text-shadow: 0 4px 0 var(--line); font-variant-numeric: tabular-nums; }
-.score__unit { font-size: 24px; font-weight: 800; }
-.remain { color: var(--ink-soft); font-weight: 700; }
+.axes { width: 100%; margin: 0; display: grid; gap: 8px; }
+.axis {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  padding: 8px 14px;
+  background: var(--card);
+  border: 3px solid var(--line);
+  border-radius: 14px;
+}
+.axis__label { font-weight: 800; display: grid; text-align: left; }
+.axis__note { font-size: 12px; font-weight: 700; color: var(--ink-soft); font-variant-numeric: tabular-nums; }
+.axis__value { margin: 0; display: flex; align-items: baseline; gap: 4px; }
+.axis__score { font-size: 32px; font-weight: 900; line-height: 1; color: var(--primary); font-variant-numeric: tabular-nums; }
+.axis__unit { font-weight: 800; }
+.axis__tier {
+  margin-left: 6px;
+  min-width: 2em;
+  padding: 2px 8px;
+  border: 2px solid var(--line);
+  border-radius: 999px;
+  font-weight: 900;
+  text-align: center;
+  background: var(--card);
+  color: var(--ink);
+}
+.axis.is-high .axis__tier { background: var(--accent); color: #2b2140; }
+.axis.is-mid .axis__tier { background: var(--yellow); color: #2b2140; }
+.incidents { font-weight: 900; color: var(--danger); }
+
+/* 結果画面の仕上がりの絵（R-1〜R-5）。絵を大きく出し、点数・称号・ボタンまで1画面に収める */
+.screen--result { gap: 10px; }
+/* 絵は残りの高さいっぱいに広げる（点数・称号・ボタンを押し出さない範囲で） */
+.result-picture { width: 100%; display: flex; justify-content: center; flex: 1 1 0; min-height: 180px; }
+.result-picture__svg { display: block; height: 100%; max-height: 52dvh; width: auto; max-width: 100%; }
+.result-bubble__body { fill: rgba(255, 255, 255, 0.3); stroke: rgba(43, 33, 64, 0.45); stroke-width: 1.2; }
+.result-floor__shadow { fill: rgba(0, 0, 0, 0.25); }
+.result-film.is-floor .film__sheet { fill: rgba(214, 196, 168, 0.75); }
+.result-floor__dust { stroke-width: 0.6; }
+/* 点数の軸は3つ横に並べて高さを詰める */
+.screen--result .axes { grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 6px; }
+.screen--result .axis { flex-direction: column; justify-content: flex-start; gap: 2px; padding: 6px 4px; }
+.screen--result .axis__label { text-align: center; font-size: 14px; justify-items: center; }
+.screen--result .axis__note { font-size: 11px; }
+.screen--result .axis__score { font-size: 26px; }
+.screen--result .axis__tier { margin-left: 2px; padding: 0 6px; }
+.screen--result .rank { padding: 10px 14px; gap: 4px; }
+.screen--result .rank__title { font-size: 24px; line-height: 1.3; overflow-wrap: anywhere; }
+/* 言葉をつなげた称号（R-8）は長くなるので、長いときは文字を小さくして2〜3行に収める */
+.screen--result .rank__title.is-long { font-size: 19px; }
+
+/* シェア文とURLのコピー（R-7） */
+.share-row { position: relative; }
+.share-row .btn--x { flex: 1.4; }
+.btn--copy { background: var(--accent); color: #2b2140; }
+.copied {
+  position: absolute;
+  left: 50%;
+  bottom: calc(100% + 6px);
+  margin: 0;
+  padding: 4px 14px;
+  border: 2px solid var(--line);
+  border-radius: 999px;
+  background: var(--yellow);
+  color: #2b2140;
+  font-weight: 900;
+  white-space: nowrap;
+  pointer-events: none;
+  opacity: 0;
+  transform: translate(-50%, 4px);
+  transition: opacity 0.15s, transform 0.15s;
+}
+.copied.is-shown { opacity: 1; transform: translate(-50%, 0); }
+/* コピーできない端末向け: シェア文を選べる形で、画面の下に重ねて出す */
+.copy-fallback {
+  position: fixed;
+  left: 50%;
+  bottom: max(16px, env(safe-area-inset-bottom));
+  transform: translateX(-50%);
+  width: min(448px, calc(100% - 32px));
+  padding: 14px;
+  display: grid;
+  gap: 10px;
+  background: var(--card);
+  border: 3px solid var(--line);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow);
+  z-index: 20;
+}
+.copy-fallback[hidden] { display: none; }
+.copy-fallback__note { font-size: 14px; font-weight: 700; text-align: left; }
+.copy-fallback__text {
+  width: 100%;
+  font: inherit;
+  font-size: 14px;
+  padding: 8px;
+  border: 2px solid var(--line);
+  border-radius: 10px;
+  background: var(--bg);
+  color: var(--ink);
+  resize: none;
+  user-select: text;
+  -webkit-user-select: text;
+}
+
+/* 調整値エラー */
+.screen--error { justify-content: center; }
+.param-errors {
+  width: 100%;
+  margin: 0;
+  padding: 16px 16px 16px 32px;
+  text-align: left;
+  background: var(--card);
+  border: 3px solid var(--danger);
+  border-radius: var(--radius);
+  display: grid;
+  gap: 6px;
+  overflow-wrap: anywhere;
+}
 .rank {
   width: 100%;
   background: var(--card);
@@ -252,6 +578,4 @@ h1, h2, p { margin: 0; }
   display: grid;
   gap: 6px;
 }
-.rank__no { font-size: 13px; color: var(--ink-soft); font-weight: 700; }
 .rank__title { font-size: 28px; font-weight: 900; }
-.is-dropped .score__value { color: var(--danger); }
