@@ -13,7 +13,7 @@ WIPE_SCRATCH_RUBS,10,回,拭く,この回数こするとその場所の基板が
 WIPE_DAMAGE_PENALTY,1.5,倍,拭く,削れた割合に掛ける減点倍率
 WIPE_EXPOSE_LIMIT,0.1,割合,拭く,基板が見える場所がこの割合を超えると「研磨しすぎあり」
 WIPE_SHEET_DRY_MS,600,ms,拭く,拭いた跡の濡れた光りが乾いて消えるまでの時間（見た目のみ）
-DUST_COUNT,5,個,埃取り,最初に置く埃の数（そのあとは降り続ける）
+DUST_COUNT,10,個,埃取り,最初に置く埃の数（そのあとは降り続ける）
 DUST_STICKER_RADIUS,20,SVG座標,埃取り,埃取りシールの半径。この円の中の埃をまとめて取る
 DUST_SPAWN_START,3000,ms,埃取り,埃が降ってくる間隔（工程の開始時）
 DUST_SPAWN_MIN,600,ms,埃取り,埃が降ってくる間隔の最短
