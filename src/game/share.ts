@@ -43,7 +43,7 @@ export function resultHeading(outcome: Pick<GameOutcome, 'reason' | 'incidents'>
 }
 
 export function buildShareText(outcome: GameOutcome, url?: string): string {
-  const rank = getTitle(outcome.tiers, outcome.incidents);
+  const rank = getTitle(outcome);
   const incidents = incidentNames(outcome.incidents);
   const lines = [
     '保護フィルム貼りの結果！',
