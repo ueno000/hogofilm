@@ -2,6 +2,7 @@ import { SCREEN } from './phone';
 import { createDelays, createStageView, nextButton } from './shell';
 import { svgEl, toSvgPoint, trackPointer } from './svg';
 import type { Stage } from './stage';
+import { usesDrawnCursor } from './logic/pointer';
 import {
   createDust,
   DUST_LEVEL_LABEL,
@@ -87,7 +88,7 @@ export const dustStage: Stage = {
     cursor.classList.add('is-hidden');
     view.layer.append(cursor);
     const onHover = (e: PointerEvent) => {
-      if (e.pointerType !== 'mouse' || done) return;
+      if (!usesDrawnCursor(e.pointerType) || done) return;
       const p = toSvgPoint(view.svg, e.clientX, e.clientY);
       cursor.setAttribute('transform', `translate(${p.x.toFixed(1)} ${p.y.toFixed(1)})`);
       cursor.classList.remove('is-hidden');

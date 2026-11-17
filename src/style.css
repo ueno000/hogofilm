@@ -411,6 +411,21 @@ h1, h2, p { margin: 0; }
 .bubble__shine { fill: #fff; }
 .bubble { transition: opacity 0.25s; }
 .bubble.is-out { opacity: 0; }
+/* PC のカーソル代わりの指（B-5）。指はスマホの外へはみ出して描き、プレイ領域の中で切る */
+.playfield[data-stage='bubbles'] { overflow: clip; }
+.playfield[data-stage='bubbles'] .phone { overflow: visible; }
+.playfield.has-finger-cursor { cursor: none; }
+.finger-cursor { pointer-events: none; }
+.finger-cursor.is-hidden { display: none; }
+.finger-cursor__skin { fill: #ffcfa6; stroke: #2b2140; stroke-width: 1.5; stroke-linejoin: round; }
+.finger-cursor__nail { fill: #ffe9dc; stroke: #e6a98a; stroke-width: 0.8; }
+.finger-cursor__crease { fill: none; stroke: #d9906e; stroke-width: 1; stroke-linecap: round; }
+.finger-cursor__contact { fill: rgba(43, 33, 64, 0.28); opacity: 0; transition: opacity 0.08s; }
+.finger-cursor__body { transform-box: fill-box; transform-origin: 50% 0%; transition: transform 0.08s ease-out; }
+/* 押している間は、指先が少し沈んで（縮んで）、触れているところに影が出る */
+.finger-cursor.is-pressed .finger-cursor__body { transform: translateY(2px) scale(0.92, 0.88); }
+.finger-cursor.is-pressed .finger-cursor__contact { opacity: 1; }
+.finger-cursor.is-pressed .finger-cursor__skin { fill: #f7b98e; }
 /* 速すぎて割れた気泡は、はじけたように一瞬ふくらんで縮む（B-1） */
 .bubble.is-split .bubble__body { animation: bubble-split 0.3s ease-out; transform-box: fill-box; transform-origin: 50% 50%; }
 @keyframes bubble-split {
