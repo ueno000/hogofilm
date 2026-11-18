@@ -111,6 +111,13 @@ export function rubAt(s: WipeState, x: number, y: number, radius = WIPE_RADIUS):
   return changed;
 }
 
+/** 残っている汚れの段数の合計。1回の動きの前後で比べると、汚れが何段落ちたかが分かる（S-10） */
+export function dirtLeft(s: WipeState): number {
+  let total = 0;
+  for (const d of s.dirt) total += d;
+  return total;
+}
+
 /** 素早いドラッグでも隙間ができないよう、線分上を細かく調べる。 */
 export function rubLine(s: WipeState, x0: number, y0: number, x1: number, y1: number, radius = WIPE_RADIUS): number {
   const dist = Math.hypot(x1 - x0, y1 - y0);

@@ -8,28 +8,53 @@ import {
   holdTicks,
   judgmentSound,
   resultSound,
-  squeakSteps,
-  WIPE_SE_DISTANCE,
+  shouldSqueak,
+  WIPE_SE_MIN_MS,
 } from '../../src/audio/cues';
 import { soundLength, SOUNDS, toneGain } from '../../src/audio/tones';
 import type { Judgment } from '../../src/stages/logic/tack';
+import { SCREEN } from '../../src/stages/phone';
+import { beginStroke, cellCenter, createWipe, dirtLeft, endStroke, rubAt } from '../../src/stages/logic/wipe';
 
-describe('拭く「キュッ」（S-4）', () => {
-  it('指が WIPE_SE_DISTANCE 動くたびに1回。余りは次に持ち越す', () => {
-    const step = 40;
-    expect(squeakSteps(0, 30, step)).toEqual({ count: 0, carry: 30 });
-    expect(squeakSteps(30, 15, step)).toEqual({ count: 1, carry: 5 });
-    expect(squeakSteps(5, 100, step)).toEqual({ count: 2, carry: 25 });
+describe('拭く「キュッ」（S-10）', () => {
+  it('その動きで汚れが落ちたときだけ鳴る。綺麗な場所をこすっても鳴らない', () => {
+    expect(shouldSqueak(1, 1000, -Infinity)).toBe(true);
+    expect(shouldSqueak(0, 1000, -Infinity)).toBe(false);
   });
 
-  it('速くこするほど続けて鳴る（同じ時間で動いた距離が長いほど回数が多い）', () => {
-    const slow = squeakSteps(0, WIPE_SE_DISTANCE * 1.5).count;
-    const fast = squeakSteps(0, WIPE_SE_DISTANCE * 4.5).count;
-    expect(fast).toBeGreaterThan(slow);
+  it('一度に複数のマスが落ちても、鳴らすかどうかの答えは1つ（1回だけ鳴る）', () => {
+    expect(shouldSqueak(5, 1000, -Infinity)).toBe(true);
   });
 
-  it('止まっている（動いた距離 0）ときは鳴らない', () => {
-    expect(squeakSteps(39, 0, 40)).toEqual({ count: 0, carry: 39 });
+  it('前に鳴らしてから WIPE_SE_MIN_MS 未満なら鳴らさない', () => {
+    expect(WIPE_SE_MIN_MS).toBe(90);
+    expect(shouldSqueak(1, 1089, 1000)).toBe(false);
+    expect(shouldSqueak(1, 1090, 1000)).toBe(true);
+  });
+});
+
+describe('拭く「キュッ」を拭く工程の判定とつなげる（S-10）', () => {
+  it('汚れのマスを拭くと汚れの合計が減り、鳴る。拭き終えたマスをもう一度こすっても減らず、鳴らない', () => {
+    const s = createWipe(SCREEN, () => 0.5);
+    s.dirt.fill(0);
+    s.dirt[0] = 1;
+    s.dirt[1] = 1;
+    const c = cellCenter(s, 0);
+    let before = dirtLeft(s);
+    beginStroke(s);
+    rubAt(s, c.x, c.y);
+    endStroke(s);
+    const cleaned = before - dirtLeft(s);
+    expect(cleaned).toBeGreaterThanOrEqual(1);
+    expect(shouldSqueak(cleaned, 1000, -Infinity)).toBe(true);
+
+    // 汚れが落ちたあとの場所をこする（削れは溜まるが、汚れは減らない）
+    s.dirt.fill(0);
+    before = dirtLeft(s);
+    beginStroke(s);
+    rubAt(s, c.x, c.y);
+    endStroke(s);
+    expect(shouldSqueak(before - dirtLeft(s), 2000, 1000)).toBe(false);
   });
 });
 
