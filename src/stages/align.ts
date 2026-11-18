@@ -4,7 +4,18 @@ import { handsGroup } from './hands';
 import { createStageView } from './shell';
 import type { Stage } from './stage';
 import { NO_BUTTON_SOUND } from '../audio/buttons';
-import { alignQuality, createAlign, holdDistance, moveFilm, shakeOffset, type AlignState, type Direction } from './logic/align';
+import { playSound } from '../audio/sound';
+import { ALIGN_HOLD_SE_SCALE, holdTicks } from '../audio/cues';
+import {
+  ALIGN_HOLD_DELAY_MS,
+  alignQuality,
+  createAlign,
+  holdDistance,
+  moveFilm,
+  shakeOffset,
+  type AlignState,
+  type Direction,
+} from './logic/align';
 
 const KEY_DIR: Record<string, Direction> = {
   ArrowUp: 'up',
@@ -20,6 +31,8 @@ interface Hold {
   startedAt: number;
   /** 押し始めたもの（キー名かポインター ID）。離したときに照合する */
   source: string;
+  /** 長押し中に鳴らした「ピコッ」の回数（S-6） */
+  ticks: number;
 }
 
 export const alignStage: Stage = {
@@ -48,7 +61,14 @@ export const alignStage: Stage = {
 
     const step = () => {
       if (!hold) return;
-      state = moveFilm(hold.origin, hold.dir, holdDistance(performance.now() - hold.startedAt));
+      const held = performance.now() - hold.startedAt;
+      state = moveFilm(hold.origin, hold.dir, holdDistance(held));
+      // 長押しで動いている間は、一定の間隔で小さく「ピコッ」（S-6）
+      const ticks = holdTicks(held, ALIGN_HOLD_DELAY_MS);
+      if (ticks > hold.ticks) {
+        hold.ticks = ticks;
+        playSound('pico', ALIGN_HOLD_SE_SCALE);
+      }
     };
     // 手ブレのため、工程中はずっと毎フレーム描き直す
     const loop = () => {
@@ -61,7 +81,9 @@ export const alignStage: Stage = {
     const press = (dir: Direction, source: string) => {
       if (done) return;
       release();
-      hold = { dir, origin: state, startedAt: performance.now(), source };
+      hold = { dir, origin: state, startedAt: performance.now(), source, ticks: 0 };
+      // 押すたびに「ピコッ」。ぴったりかどうかでは変えない（S-6, A-4）
+      playSound('pico');
       step();
       render();
     };

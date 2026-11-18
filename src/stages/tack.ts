@@ -2,6 +2,8 @@ import { filmCorners, filmGroup } from './film';
 import { createDelays, createStageView } from './shell';
 import { svgEl, trackPointer } from './svg';
 import type { Stage } from './stage';
+import { playSound } from '../audio/sound';
+import { judgmentSound } from '../audio/cues';
 import {
   filmAngle,
   isRingExpired,
@@ -23,6 +25,8 @@ import { param } from '../game/params';
 const TAP_RANGE = param('TAP_RANGE');
 const FIRST_DELAY = param('FIRST_DELAY');
 const BETWEEN_DELAY = param('BETWEEN_DELAY');
+/** フィルムが落ち始めてから「ガシャーン！」を鳴らすまで（ms）。落ちる絵（0.9秒）の途中で床に当たる感じに合わせる */
+const CRASH_DELAY_MS = 350;
 
 export const tackStage: Stage = {
   id: 'tack',
@@ -101,6 +105,7 @@ export const tackStage: Stage = {
       label.setAttribute('y', String(c.y < 200 ? c.y + 34 : c.y - 24));
       label.setAttribute('class', `judge is-${j}`);
       renderStatus();
+      playSound(judgmentSound(j));
 
       // 落としたときは傾けない（そのまま落ちる）
       if (shouldDrop(judgments)) {
@@ -108,6 +113,8 @@ export const tackStage: Stage = {
         film.classList.add('is-falling');
         markers.forEach((m) => m.classList.add('is-falling'));
         view.status.textContent = 'フィルムが落ちた！';
+        // 落ちて床に当たるころに「ガシャーン！」を一度（S-7）
+        delays.later(() => playSound('crash'), CRASH_DELAY_MS);
         delays.later(() => ctx.drop(), 900);
         return;
       }

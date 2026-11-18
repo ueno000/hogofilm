@@ -35,36 +35,83 @@ export function unlockSound(): void {
   }
 }
 
-/** 1つの音を鳴らす */
-function playTone(ac: AudioContext, tone: Tone, gain: number): void {
+let noise: AudioBuffer | undefined;
+/** 雑音の素（1秒分の白色雑音）。一度作って使い回す */
+function noiseBuffer(ac: AudioContext): AudioBuffer {
+  if (noise && noise.sampleRate === ac.sampleRate) return noise;
+  noise = ac.createBuffer(1, ac.sampleRate, ac.sampleRate);
+  const data = noise.getChannelData(0);
+  for (let i = 0; i < data.length; i++) data[i] = Math.random() * 2 - 1;
+  return noise;
+}
+
+/** 1つの音を鳴らす。pitch は高さの倍率（泡の粒を少しずつ違う高さにするときに使う） */
+function playTone(ac: AudioContext, tone: Tone, gain: number, pitch: number): void {
   const start = ac.currentTime + (tone.delay ?? 0);
   const end = start + tone.duration;
-  const osc = ac.createOscillator();
   const amp = ac.createGain();
-  osc.type = tone.wave;
-  osc.frequency.setValueAtTime(tone.freq, start);
-  if (tone.freqEnd !== undefined) osc.frequency.exponentialRampToValueAtTime(tone.freqEnd, end);
   // 立ち上がり → なめらかに 0 へ（0 には指数で下げられないので、ごく小さい値まで下げる）
   amp.gain.setValueAtTime(0.0001, start);
   amp.gain.linearRampToValueAtTime(gain, start + tone.attack);
   amp.gain.exponentialRampToValueAtTime(0.0001, end);
-  osc.connect(amp).connect(ac.destination);
-  osc.start(start);
-  osc.stop(end + 0.02);
+  amp.connect(ac.destination);
+
+  let src: AudioScheduledSourceNode;
+  let freq: AudioParam;
+  if (tone.wave === 'noise') {
+    const buf = ac.createBufferSource();
+    buf.buffer = noiseBuffer(ac);
+    buf.loop = true;
+    const filter = ac.createBiquadFilter();
+    filter.type = tone.filter ?? 'bandpass';
+    buf.connect(filter).connect(amp);
+    src = buf;
+    freq = filter.frequency;
+  } else {
+    const osc = ac.createOscillator();
+    osc.type = tone.wave;
+    osc.connect(amp);
+    src = osc;
+    freq = osc.frequency;
+  }
+  freq.setValueAtTime(tone.freq * pitch, start);
+  if (tone.freqEnd !== undefined) freq.exponentialRampToValueAtTime(tone.freqEnd * pitch, end);
+  src.start(start);
+  src.stop(end + 0.02);
 }
 
-/** 効果音を鳴らす。音がオフ・準備前・Web Audio がないときは鳴らさない */
-export function playSound(name: SoundName, scale = 1): void {
+/**
+ * 効果音を鳴らす。音がオフ・準備前・Web Audio がないときは鳴らさない。
+ * scale は大きさの倍率（長押し中の小さい「ピコッ」、泡の音など）、pitch は高さの倍率
+ */
+export function playSound(name: SoundName, scale = 1, pitch = 1): void {
   // resume() の直後はまだ suspended のことがある。予約した音は再開したときに鳴る
   if (!on || !ctx || ctx.state === 'closed') return;
   try {
     for (const tone of SOUNDS[name]) {
       const gain = toneGain(tone, on, undefined, scale);
-      if (gain > 0) playTone(ctx, tone, gain);
+      if (gain > 0) playTone(ctx, tone, gain, pitch);
     }
   } catch {
     // 鳴らせなくてもゲームは止めない
   }
+}
+
+/** 繰り返し鳴らす音（気泡抜きの泡の音など）。stop で必ず止める */
+export interface SoundLoop {
+  stop(): void;
+}
+
+/**
+ * 同じ音を intervalMs ごとに鳴らし続ける（S-8）。高さは少しずつばらつかせる。
+ * 大きさは鳴らすたびに scale() で決め、0 の間は鳴らさない。工程の後片付けで stop() を呼ぶこと
+ */
+export function startSoundLoop(name: SoundName, intervalMs: number, scale: () => number, pitchSpread = 0.25): SoundLoop {
+  const timer = window.setInterval(() => {
+    const s = scale();
+    if (s > 0) playSound(name, s, 1 + (Math.random() * 2 - 1) * pitchSpread);
+  }, intervalMs);
+  return { stop: () => window.clearInterval(timer) };
 }
 
 export function isSoundOn(): boolean {

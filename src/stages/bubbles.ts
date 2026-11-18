@@ -4,6 +4,8 @@ import { SCREEN } from './phone';
 import { createDelays, createStageView, nextButton } from './shell';
 import { svgEl, trackPointer } from './svg';
 import type { Stage } from './stage';
+import { playSound, startSoundLoop } from '../audio/sound';
+import { bubbleHumScale, BUBBLE_SE_INTERVAL_MS } from '../audio/cues';
 import {
   BUBBLE_RETURN_MS,
   bubbleQuality,
@@ -108,6 +110,11 @@ export const bubblesStage: Stage = {
     /** この押し込みで押した気泡と、最後に押した向き */
     let pushDir = new Map<number, { x: number; y: number }>();
     let lastMoveAt = 0;
+    let touching = false;
+    // 触っている間は泡の音を鳴らし続ける。動かしている間は少し大きく、離すと止める（S-8）
+    const hum = startSoundLoop('bubble', BUBBLE_SE_INTERVAL_MS, () =>
+      done ? 0 : bubbleHumScale(touching, performance.now() - lastMoveAt),
+    );
 
     const untrack = trackPointer(view.playfield, view.svg, {
       start: () => {
@@ -115,6 +122,7 @@ export const bubblesStage: Stage = {
         stopReturns();
         pushDir = new Map();
         lastMoveAt = performance.now();
+        touching = true;
       },
       move: (p, prev) => {
         if (done) return;
@@ -126,9 +134,14 @@ export const bubblesStage: Stage = {
         // 割れた気泡は指から離れたので、指を離しても戻さない
         for (const b of split) pushDir.delete(b.id);
         if (pushed.length || split.length) render();
-        if (split.length) popSplit(split);
+        if (split.length) {
+          popSplit(split);
+          // 気泡が割れたときは「プチッ」（S-8, B-1）
+          playSound('burst');
+        }
       },
       end: (p) => {
+        touching = false;
         if (done) return;
         const list = releaseBubbles(bubbles, SCREEN, p.x, p.y, pushDir);
         pushDir = new Map();
@@ -153,6 +166,8 @@ export const bubblesStage: Stage = {
 
     return () => {
       done = true;
+      // 鳴り続ける音は工程を抜けたら必ず止める
+      hum.stop();
       untrack();
       unmountFinger();
       stopReturns();
