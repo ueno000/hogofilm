@@ -7,6 +7,7 @@ import { STAGE_ORDER, type EndReason, type FinishPicture } from '../game/types';
 import { getStage } from '../stages';
 import { mountSkippedStage } from '../stages/skipped';
 import type { Scene } from './scene';
+import { speakerButton } from '../audio/buttons';
 
 export const playScene: Scene = (root, nav) => {
   const state = new GameState();
@@ -16,8 +17,9 @@ export const playScene: Scene = (root, nav) => {
   const timeBar = h('div', { class: 'hud__bar-fill' });
   const bar = h('div', { class: 'hud__bar' }, timeBar);
   const notice = h('p', { class: 'hud__notice', 'aria-live': 'polite' });
+  const speaker = speakerButton('speaker--hud');
   const hud = h('header', { class: 'hud', 'data-phase': 'normal' },
-    h('div', { class: 'hud__row' }, stepLabel, stageName, timeLabel),
+    h('div', { class: 'hud__row' }, stepLabel, stageName, timeLabel, speaker.el),
     bar,
     notice,
   );
@@ -138,5 +140,6 @@ export const playScene: Scene = (root, nav) => {
     timer.stop();
     clearTimeout(noticeTimer);
     unmountStage?.();
+    speaker.destroy();
   };
 };

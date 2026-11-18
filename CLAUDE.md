@@ -34,6 +34,7 @@ npm run build   # tsc --noEmit による型チェック + vite build
 - `src/titles.csv` — 称号の言葉とひとこと。企画管理シートの「称号CSV」タブから出力したものを置く（`src/game/titles.ts` で読む）
 - `src/stages/` — 各工程の UI。`Stage` インターフェース（`stage.ts`）を実装し、`index.ts` に登録する
 - `src/stages/logic/` — 各工程の判定ロジック（DOM 非依存の純粋関数）
+- `src/audio/` — 効果音（Web Audio で合成）。音の設計図 `tones.ts` とオンオフの設定 `settings.ts` は DOM 非依存、鳴らすのは `sound.ts`、ボタンの音とスピーカーのボタンは `buttons.ts`
 - `tests/` — `src` と対応する配置で Vitest のテストを置く
 
 ## コーディング規約

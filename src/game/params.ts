@@ -10,6 +10,7 @@ export const PARAM_NAMES = [
   'TIME_WARN_RATIO',
   'TIME_DANGER_MS',
   'TIME_NOTICE_MS',
+  'SE_VOLUME',
   'DROP_AUTO_STAGE_MS',
   'WIPE_COLS',
   'WIPE_ROWS',

@@ -3,6 +3,7 @@ import { filmGroup } from './film';
 import { handsGroup } from './hands';
 import { createStageView } from './shell';
 import type { Stage } from './stage';
+import { NO_BUTTON_SOUND } from '../audio/buttons';
 import { alignQuality, createAlign, holdDistance, moveFilm, shakeOffset, type AlignState, type Direction } from './logic/align';
 
 const KEY_DIR: Record<string, Direction> = {
@@ -81,7 +82,8 @@ export const alignStage: Stage = {
 
     const dirBtn = (dir: Direction, label: string, aria: string) => {
       const src = (e: PointerEvent) => `pointer:${e.pointerId}`;
-      const btn = h('button', { class: `btn btn--pad pad-${dir}`, 'aria-label': aria }, label);
+      // 移動のボタンは「ピコッ」を鳴らす（S-6, #81）ので、ボタン共通の「ポッ」は付けない
+      const btn = h('button', { class: `btn btn--pad pad-${dir}`, 'aria-label': aria, [NO_BUTTON_SOUND]: true }, label);
       btn.addEventListener('pointerdown', (e) => {
         e.preventDefault();
         press(dir, src(e));

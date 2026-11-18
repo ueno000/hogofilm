@@ -7,6 +7,7 @@ import { titleScene } from './scenes/title';
 import { howToScene } from './scenes/howto';
 import { playScene } from './scenes/play';
 import { resultScene } from './scenes/result';
+import { installButtonSound } from './audio/buttons';
 
 const root = document.querySelector<HTMLElement>('#app')!;
 let cleanup: (() => void) | void;
@@ -41,5 +42,7 @@ if (PARAM_ERRORS.length > 0) {
 } else if (TITLE_ERRORS.length > 0) {
   showCsvErrors('src/titles.csv', '称号', TITLE_ERRORS);
 } else {
+  // どの画面のボタンでも「ポッ」を鳴らし、最初の操作で音の準備をする（S-1, S-3）
+  installButtonSound(root);
   nav.toTitle();
 }
