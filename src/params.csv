@@ -2,6 +2,7 @@ name,value,unit,stage,description
 TIME_LIMIT_MS,90000,ms,全体,制限時間
 TIME_WARN_RATIO,0.5,割合,全体,残り時間がこの割合を切るとゲージが黄色＋半分の合図
 TIME_DANGER_MS,10000,ms,全体,残り時間がこれを切るとゲージが赤＋残り10秒の演出。秒数の文字も赤
+SE_VOLUME,0.6,割合,全体,効果音全体の音量（0〜1）
 TIME_NOTICE_MS,800,ms,全体,「半分経過！」「残り10秒！」を出しておく時間
 DROP_AUTO_STAGE_MS,1000,ms,仮固定,落下後、フィルムなしで残りの工程を1つ自動で進める時間
 WIPE_COLS,10,マス,拭く,汚れ判定の横分割数
@@ -13,6 +14,7 @@ WIPE_SCRATCH_RUBS,10,回,拭く,この回数こするとその場所の基板が
 WIPE_DAMAGE_PENALTY,1.5,倍,拭く,削れた割合に掛ける減点倍率
 WIPE_EXPOSE_LIMIT,0.1,割合,拭く,基板が見える場所がこの割合を超えると「研磨しすぎあり」
 WIPE_SHEET_DRY_MS,600,ms,拭く,拭いた跡の濡れた光りが乾いて消えるまでの時間（見た目のみ）
+WIPE_SE_DISTANCE,40,SVG座標,拭く,指がこの距離動くたびに「キュッ」を鳴らす
 DUST_COUNT,10,個,埃取り,最初に置く埃の数（そのあとは降り続ける）
 DUST_STICKER_RADIUS,20,SVG座標,埃取り,埃取りシールの半径。この円の中の埃をまとめて取る
 DUST_SPAWN_START,3000,ms,埃取り,埃が降ってくる間隔（工程の開始時）
@@ -31,6 +33,7 @@ ALIGN_HOLD_ACCEL_MS,600,ms,位置合わせ,動き出してから最高速度に�
 ALIGN_START_MAX,60,SVG座標,位置合わせ,開始時のずれの最大（縦横それぞれ）
 ALIGN_LIMIT,40,SVG座標,位置合わせ,動かせる範囲（縦横それぞれ）
 ALIGN_TOLERANCE,18,SVG座標,位置合わせ,このずれ量で品質 0
+ALIGN_SE_HOLD_MS,120,ms,位置合わせ,長押しで動いている間に「ピコッ」を鳴らす間隔
 ALIGN_SHAKE_VISUAL,2,SVG座標,位置合わせ,手ブレの揺れ幅（見た目のみ、判定には使わない）
 RING_START,44,SVG座標,仮固定,リングの開始半径
 RING_DURATION,1000,ms,仮固定,リングが 0 まで縮む時間
@@ -53,6 +56,7 @@ BUBBLE_SPLIT_SPEED,300,SVG座標/秒,気泡抜き,気泡を押す指がこの速
 BUBBLE_SPLIT_MIN_R,4,SVG座標,気泡抜き,これより小さい半径の気泡は割れない
 BUBBLE_RETURN_DIST,12,SVG座標,気泡抜き,押している途中で指を離したときに気泡が戻る距離
 BUBBLE_RETURN_MS,300,ms,気泡抜き,気泡が戻りきるまでの時間
+BUBBLE_SE_VOLUME,0.4,割合,気泡抜き,泡の音の大きさ（SE_VOLUME に掛ける）
 SPEED_FULL_REMAIN_MS,30000,ms,評価,この残り時間以上で手早さ100点
 RANK_HIGH_MIN,80,点,評価,点数の軸が「高」になる下限
 RANK_MID_MIN,40,点,評価,点数の軸が「中」になる下限
