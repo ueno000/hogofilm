@@ -2,6 +2,7 @@ import { SCREEN } from './phone';
 import { createDelays, createStageView, nextButton } from './shell';
 import { svgEl, toSvgPoint, trackPointer } from './svg';
 import type { Stage } from './stage';
+import { playSound } from '../audio/sound';
 import { usesDrawnCursor } from './logic/pointer';
 import {
   createDust,
@@ -121,6 +122,8 @@ export const dustStage: Stage = {
     const untrack = trackPointer(view.playfield, view.svg, {
       start: (p) => {
         if (done) return;
+        // 取れても取れなくても同じ「ペタッ」（S-5）
+        playSound('stick');
         const picked = stickDust(dusts, p.x, p.y);
         for (const d of picked) nodes.get(d.id)?.classList.add('is-removed');
         stamp(p.x, p.y, picked);

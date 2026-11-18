@@ -18,6 +18,8 @@ import type { GameOutcome, ScoreAxis } from '../game/types';
 import { resultPicture } from './resultPicture';
 import { createShareImage } from './shareImage';
 import type { Scene } from './scene';
+import { playSound } from '../audio/sound';
+import { resultSound } from '../audio/cues';
 
 export const resultScene = (outcome: GameOutcome): Scene => (root, nav) => {
   // 手早さには、点数の根拠として残り時間を小さく添える
@@ -137,6 +139,9 @@ export const resultScene = (outcome: GameOutcome): Scene => (root, nav) => {
       fallback,
     ),
   );
+
+  // 結果が出たときに一度「ばばーん！」。時間切れ・落下は間の抜けた「ばばーん…」（S-9）
+  playSound(resultSound(outcome.reason, dropped));
 
   // 画面に出た絵から色を読むので、DOM に入れてから作る
   imageReady = createShareImage(outcome, picture)
