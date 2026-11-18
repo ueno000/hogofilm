@@ -120,6 +120,7 @@ git switch -c feat/<番号>-xxx
 ```
 
 - リリース時は `develop` → `main` の PR を作る。マージ後、`main` の内容が最終版になる。
+  - 版の番号・CHANGELOG.md・GitHub Releases の付け方は [docs/management.md](docs/management.md) の「リリースの手順」に従う。
 
 ## コミット
 
