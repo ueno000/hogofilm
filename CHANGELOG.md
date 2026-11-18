@@ -8,6 +8,8 @@
 
 ## [未リリース]
 
+## [0.3.0] - 2026-11-18
+
 ### 追加
 
 - 効果音を付けた。音は Web Audio でその場で合成し、音のファイルは使わない。BGM はない（S-1, #83）
@@ -79,6 +81,7 @@
 
 - 調整値を `src/params.csv` から読み込むようにした。企画管理シートの「パラメータCSV」タブを書き出して差し替える（#37）
 
-[未リリース]: https://github.com/ueno000/hogofilm/compare/v0.2.0...develop
+[未リリース]: https://github.com/ueno000/hogofilm/compare/v0.3.0...develop
+[0.3.0]: https://github.com/ueno000/hogofilm/releases/tag/v0.3.0
 [0.2.0]: https://github.com/ueno000/hogofilm/releases/tag/v0.2.0
 [0.1.0]: https://github.com/ueno000/hogofilm/releases/tag/v0.1.0
