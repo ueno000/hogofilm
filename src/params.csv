@@ -15,10 +15,10 @@ WIPE_DAMAGE_PENALTY,1.5,倍,拭く,削れた割合に掛ける減点倍率
 WIPE_EXPOSE_LIMIT,0.1,割合,拭く,基板が見える場所がこの割合を超えると「研磨しすぎあり」
 WIPE_SHEET_DRY_MS,600,ms,拭く,拭いた跡の濡れた光りが乾いて消えるまでの時間（見た目のみ）
 WIPE_SE_MIN_MS,90,ms,拭く,「キュッ」を続けて鳴らすときの最短の間隔（汚れが落ちたときだけ鳴らす）
-DUST_COUNT,10,個,埃取り,最初に置く埃の数（そのあとは降り続ける）
+DUST_COUNT,20,個,埃取り,最初に置く埃の数（そのあとは降り続ける）
 DUST_STICKER_RADIUS,20,SVG座標,埃取り,埃取りシールの半径。この円の中の埃をまとめて取る
-DUST_SPAWN_START,3000,ms,埃取り,埃が降ってくる間隔（工程の開始時）
-DUST_SPAWN_MIN,600,ms,埃取り,埃が降ってくる間隔の最短
+DUST_SPAWN_START,2000,ms,埃取り,埃が降ってくる間隔（工程の開始時）
+DUST_SPAWN_MIN,450,ms,埃取り,埃が降ってくる間隔の最短
 DUST_SPAWN_RAMP_MS,15000,ms,埃取り,開始から最短の間隔になるまでの時間
 DUST_PENALTY,0.15,割合,埃取り,「貼り始める」を押したときに残っている埃1個あたりの減点
 DUST_LEVEL_MAMIRE,20,個,埃取り,この数以上で「埃まみれ」（赤）
@@ -27,27 +27,27 @@ DUST_TITLE_MIN,50,個,埃取り,「貼り始める」を押したときに残っ
 DUST_LEVEL_ARI,6,個,埃取り,この数以上で「埃あり」（灰）。1以上で「綺麗」（緑）、0で「完璧」（金）
 ALIGN_TAP_STEP,1,SVG座標,位置合わせ,短くタップしたときに動く量
 ALIGN_HOLD_DELAY_MS,250,ms,位置合わせ,長押しで動き出すまでの待ち時間
-ALIGN_HOLD_SPEED_START,20,SVG座標/秒,位置合わせ,長押しで動き出したときの速さ
-ALIGN_HOLD_SPEED_MAX,200,SVG座標/秒,位置合わせ,長押しの最高速度
+ALIGN_HOLD_SPEED_START,40,SVG座標/秒,位置合わせ,長押しで動き出したときの速さ
+ALIGN_HOLD_SPEED_MAX,320,SVG座標/秒,位置合わせ,長押しの最高速度
 ALIGN_HOLD_ACCEL_MS,600,ms,位置合わせ,動き出してから最高速度になるまでの時間
 ALIGN_START_MAX,60,SVG座標,位置合わせ,開始時のずれの最大（縦横それぞれ）
 ALIGN_LIMIT,40,SVG座標,位置合わせ,動かせる範囲（縦横それぞれ）
 ALIGN_TOLERANCE,18,SVG座標,位置合わせ,このずれ量で品質 0
 ALIGN_SE_HOLD_MS,120,ms,位置合わせ,長押しで動いている間に「ピコッ」を鳴らす間隔
-ALIGN_SHAKE_VISUAL,2,SVG座標,位置合わせ,手ブレの揺れ幅（見た目のみ、判定には使わない）
-RING_START,44,SVG座標,仮固定,リングの開始半径
-RING_DURATION,1000,ms,仮固定,リングが 0 まで縮む時間
-RING_TARGET,12,SVG座標,仮固定,目標マーカーの半径
-JUDGE_PERFECT,3,SVG座標,仮固定,PERFECT の判定幅
-JUDGE_GOOD,7,SVG座標,仮固定,GOOD の判定幅
-JUDGE_BAD,12,SVG座標,仮固定,BAD の判定幅（超えると MISS）
+ALIGN_SHAKE_VISUAL,3.5,SVG座標,位置合わせ,手ブレの揺れ幅（見た目のみ、判定には使わない）
+RING_START,56,SVG座標,仮固定,リングの開始半径
+RING_DURATION,800,ms,仮固定,リングが 0 まで縮む時間
+RING_TARGET,16,SVG座標,仮固定,目標マーカーの半径
+JUDGE_PERFECT,4,SVG座標,仮固定,PERFECT の判定幅
+JUDGE_GOOD,9,SVG座標,仮固定,GOOD の判定幅
+JUDGE_BAD,15,SVG座標,仮固定,BAD の判定幅（超えると MISS）
 MAX_MISSES,2,回,仮固定,この回数 MISS でフィルム落下
 TACK_TILT_GOOD,1,度,仮固定,GOOD のときのフィルムの傾き（早いと左回り、遅いと右回り）
 TACK_TILT_BAD,2.5,度,仮固定,BAD のときのフィルムの傾き
 TACK_TILT_MISS,4,度,仮固定,MISS（落下しない1回目）のときのフィルムの傾き
 TACK_TILT_TOLERANCE,6,度,仮固定,この角度で仮固定の品質が 0
 TACK_TILT_LIMIT,4,度,仮固定,角度の大きさがこれ以上で「斜め貼りあり」
-TAP_RANGE,48,SVG座標,仮固定,隅のタップ受付範囲
+TAP_RANGE,60,SVG座標,仮固定,隅のタップ受付範囲
 FIRST_DELAY,700,ms,仮固定,最初のリングが出るまでの待ち
 BETWEEN_DELAY,450,ms,仮固定,隅と隅の間の待ち
 BUBBLE_COUNT,6,個,気泡抜き,気泡の数

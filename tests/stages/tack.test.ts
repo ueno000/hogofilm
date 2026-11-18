@@ -3,6 +3,7 @@ import {
   filmAngle,
   isRingExpired,
   isTilted,
+  JUDGE_BAD,
   judgeTap,
   MAX_MISSES,
   RING_DURATION,
@@ -39,7 +40,8 @@ describe('tack timing', () => {
 
   it('早すぎるタップはミス', () => {
     expect(judgeTap(0)).toBe('miss');
-    expect(judgeTap(msForRadius(RING_TARGET + 13))).toBe('miss');
+    // BAD の判定幅を超えて大きいうちに押したらミス（判定幅の値によらない）
+    expect(judgeTap(msForRadius(RING_TARGET + JUDGE_BAD + 1))).toBe('miss');
   });
 
   it('縮みきったら時間切れ', () => {

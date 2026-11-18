@@ -269,6 +269,9 @@ h1, h2, p { margin: 0; }
 .playfield[data-stage='wipe'] { overflow: clip; }
 .playfield[data-stage='wipe'] .phone { overflow: visible; }
 .wet-sheet { pointer-events: none; }
+/* 仮固定のリング（開始半径 RING_START）は隅から外へはみ出すので、スマホの外まで描く（T-5） */
+.playfield[data-stage='tack'] { overflow: clip; }
+.playfield[data-stage='tack'] .phone { overflow: visible; }
 .wet-sheet__back { fill: #b9dceb; stroke: #2b2140; stroke-width: 1.5; }
 .wet-sheet__cloth { fill: #f4fbff; stroke: #2b2140; stroke-width: 1.5; }
 .wet-sheet__fold { stroke: #9cc7da; stroke-width: 1.4; }
