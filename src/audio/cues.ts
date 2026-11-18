@@ -7,8 +7,8 @@ import type { EndReason } from '../game/types';
 import type { Judgment } from '../stages/logic/tack';
 import type { SoundName } from './tones';
 
-/** 拭く: 指がこの距離（SVG 座標）動くたびに「キュッ」を鳴らす（S-4） */
-export const WIPE_SE_DISTANCE = param('WIPE_SE_DISTANCE');
+/** 拭く: 「キュッ」を続けて鳴らすときの最短の間隔（ms）（S-10） */
+export const WIPE_SE_MIN_MS = param('WIPE_SE_MIN_MS');
 /** 位置合わせ: 長押しで動いている間に「ピコッ」を鳴らす間隔（ms）（S-6） */
 export const ALIGN_SE_HOLD_MS = param('ALIGN_SE_HOLD_MS');
 /** 気泡抜き: 泡の音の大きさ。SE_VOLUME に掛ける（S-8） */
@@ -24,15 +24,12 @@ export const BUBBLE_SE_STILL_SCALE = 0.5;
 export const BUBBLE_SE_MOVE_MS = 120;
 
 /**
- * 拭く: 指が動いた距離を足していき、WIPE_SE_DISTANCE を超えるたびに「キュッ」を1回鳴らす（S-4）。
- * 速くこするほど続けて鳴り、止まると鳴らない。汚れが落ちたかどうかは見ない（W-9）。
- * carry は前回までの余り（ストロークの最初は 0）。
+ * 拭く: 「キュッ」を鳴らすか（S-10）。その1回の動きで汚れが1段以上落ちたときだけ鳴らす。
+ * 一度に複数のマスが落ちても1回。前に鳴らしてから minMs 未満なら鳴らさない（ビープ音のように聞こえないように）。
+ * 汚れが落ちたあとの場所をこすっているときは鳴らない。lastAt は前に鳴らした時刻（まだなら -Infinity）
  */
-export function squeakSteps(carry: number, distance: number, step = WIPE_SE_DISTANCE): { count: number; carry: number } {
-  if (!(step > 0) || !Number.isFinite(distance) || distance <= 0) return { count: 0, carry };
-  const total = carry + distance;
-  const count = Math.floor(total / step);
-  return { count, carry: total - count * step };
+export function shouldSqueak(cleaned: number, now: number, lastAt: number, minMs = WIPE_SE_MIN_MS): boolean {
+  return cleaned > 0 && now - lastAt >= minMs;
 }
 
 /**
