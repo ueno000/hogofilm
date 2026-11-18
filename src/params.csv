@@ -2,6 +2,7 @@ name,value,unit,stage,description
 TIME_LIMIT_MS,90000,ms,全体,制限時間
 TIME_WARN_RATIO,0.5,割合,全体,残り時間がこの割合を切るとゲージが黄色＋半分の合図
 TIME_DANGER_MS,10000,ms,全体,残り時間がこれを切るとゲージが赤＋残り10秒の演出。秒数の文字も赤
+SE_VOLUME,0.6,割合,全体,効果音全体の音量（0〜1）
 TIME_NOTICE_MS,800,ms,全体,「半分経過！」「残り10秒！」を出しておく時間
 DROP_AUTO_STAGE_MS,1000,ms,仮固定,落下後、フィルムなしで残りの工程を1つ自動で進める時間
 WIPE_COLS,10,マス,拭く,汚れ判定の横分割数
