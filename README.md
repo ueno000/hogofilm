@@ -4,6 +4,8 @@
 
 **遊ぶ**: https://ueno000.github.io/hogofilm/ （`main` が更新されると GitHub Actions で自動的に公開されます）
 
+**変更履歴**: [CHANGELOG.md](CHANGELOG.md)（版ごとのページは [Releases](https://github.com/ueno000/hogofilm/releases)）
+
 ## 遊び方
 
 | # | 工程 | 操作 |

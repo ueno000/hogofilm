@@ -3,11 +3,12 @@ import { createStageView, nextButton } from './shell';
 import { svgEl, trackPointer } from './svg';
 import type { Stage } from './stage';
 import { playSound } from '../audio/sound';
-import { squeakSteps } from '../audio/cues';
+import { shouldSqueak } from '../audio/cues';
 import {
   beginStroke,
   cellCenter,
   createWipe,
+  dirtLeft,
   endStroke,
   isScratched,
   rubAt,
@@ -173,8 +174,15 @@ export const wipeStage: Stage = {
       });
     };
 
-    /** 「キュッ」を鳴らすまでの、動いた距離の余り */
-    let squeakCarry = 0;
+    /** 前に「キュッ」を鳴らした時刻 */
+    let squeakAt = -Infinity;
+    /** 汚れが落ちたときだけ「キュッ」。続けて鳴らすときは最短の間隔を空ける（S-10） */
+    const squeakIfCleaned = (before: number) => {
+      const now = performance.now();
+      if (!shouldSqueak(before - dirtLeft(state), now, squeakAt)) return;
+      squeakAt = now;
+      playSound('squeak');
+    };
     const untrack = trackPointer(view.playfield, view.svg, {
       start: (p) => {
         if (done) return;
@@ -182,9 +190,10 @@ export const wipeStage: Stage = {
         sheet.classList.add('is-wiping');
         placeSheet(p.x, p.y, tilt);
         wetCarry = 0;
-        squeakCarry = 0;
         addWet(p.x, p.y);
+        const before = dirtLeft(state);
         if (rubAt(state, p.x, p.y)) render();
+        squeakIfCleaned(before);
       },
       move: (p, prev) => {
         if (done) return;
@@ -193,11 +202,9 @@ export const wipeStage: Stage = {
         const marks = wetMarks(prev.x, prev.y, p.x, p.y, WIPE_RADIUS * WET_SPACING_RATIO, wetCarry);
         wetCarry = marks.carry;
         marks.points.forEach((m) => addWet(m.x, m.y));
-        // 一定の距離を動くたびに「キュッ」。汚れが落ちたかどうかでは変えない（S-4, W-9）
-        const squeak = squeakSteps(squeakCarry, Math.hypot(p.x - prev.x, p.y - prev.y));
-        squeakCarry = squeak.carry;
-        if (squeak.count > 0) playSound('squeak');
+        const before = dirtLeft(state);
         if (rubLine(state, prev.x, prev.y, p.x, p.y)) render();
+        squeakIfCleaned(before);
       },
       end: () => {
         endStroke(state);
